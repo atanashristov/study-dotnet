@@ -74,3 +74,40 @@ Open the solution in Visual Studio, then for each project:
 ```
 
 Right click on "WebApi" in solution explorer and make it a startup project.
+
+### Lesson 3.9-10: Db Context, ORM, Identity Db Context
+
+Add domain entity:
+
+- Domain\Employee.cs
+
+Add 3 classes that override Identity classes and extend these with more properties.
+These will be saved as additional columns in the database tables.
+
+- Infrastructure\Models\ApplicationRole.cs - Inherit from `IdentityRole`
+- Infrastructure\Models\ApplicationRoleClaim.cs - Inherit from `IdentityRoleClaim`
+- Infrastructure\Models\ApplicationUser.cs - Inherit from `IdentityUser`
+
+Add an application Db Context class:
+
+- Infrastructure\Context\ApplicationDbContext.cs
+
+It inherits from `IdentityDbContext` and the key types are defined as _string_ and will hold _Guid_ values.
+
+It adds the tables as DbSets, specifically the `Employees` DbSet.
+
+Add Db Context extensions for the DI:
+
+- Infrastructure\ServiceCollectionExtensions.cs
+
+We register the Db connection:
+
+- WebApi\Program.cs
+
+```csharp
+using Infrastructure;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllers();
+builder.Services.AddDatabase(builder.Configuration); // <-- here
+```
