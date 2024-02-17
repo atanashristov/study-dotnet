@@ -2,7 +2,7 @@
 
 Contains code and notes from studying [Advanced .NET Web API Security: Permission based auth & JWT](https://www.udemy.com/course/advanced-net-web-api-security-permission-based-auth-jwt/).
 
-Code is in directory [ABCHR](./ABCHR_Original/).
+Code is in directory [ABCHR_Project](./ABCHR_Project/).
 
 Original code is in directory [ABCHR_Original](./ABCHR_Original/).
 
@@ -10,66 +10,67 @@ Original code is in directory [ABCHR_Original](./ABCHR_Original/).
 
 ### Lesson 3.5: Solution Architecture
 
-We create _src_ folder.
+Create projects:
 
-Then inside _projects_:
+```sh
+dotnet new classlib -n Domain -o Domain                   # Contains domain entities
+dotnet new classlib -n Application -o Application         # Business requirements and rules
+dotnet new classlib -n Infrastructure -o Infrastructure   # External dependencies, ORM, Db context, Db connection, Service implementations
+dotnet new classlib -n Common -o Common                   # Share between WebApi and later a Blazor app, use the security features in both
+dotnet new webapi -n WebApi -o WebApi                     # API
 
-- Domain - contains domain entities
-- Application - business requirements and rules
-- Infrastructure - external dependencies, ORM, Db context, Db connection, Service implementations
-- WebApi - API. _Note_: we are not going to use the provided authentications, as we implement ours
-- Common - Share between WebApi and later a Blazor app, use the security features in both
+```
 
-Also we _disable nullables_ and _enable implicit usings_ in all projects:
+Add project references:
+
+```sh
+dotnet add Application reference Domain
+dotnet add Application reference Common
+dotnet add Infrastructure reference Application
+dotnet add WebApi reference Infrastructure
+```
+
+Add nuget packages:
+
+```sh
+ dotnet add Infrastructure package Microsoft.EntityFrameworkCore
+ dotnet add Infrastructure package Npgsql.EntityFrameworkCore.PostgreSQL
+ dotnet add Infrastructure package Microsoft.EntityFrameworkCore.Design
+ dotnet add Infrastructure package Microsoft.EntityFrameworkCore.Tools
+ dotnet add Infrastructure package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+ dotnet add Infrastructure package Microsoft.IdentityModel.Tokens
+ dotnet add Infrastructure package Microsoft.IdentityModel.JsonWebTokens
+```
+
+Notes:
+
+- One could use `Microsoft.EntityFrameworkCore.InMemory` instead of `Npgsql` during development
+- For MS SQL Server use `Microsoft.EntityFrameworkCore.SqlServer`
+
+Create solution and add projects:
+
+```sh
+dotnet new sln -n ABCHR
+dotnet sln add Domain
+dotnet sln add Application
+dotnet sln add Infrastructure
+dotnet sln add Common
+dotnet sln add WebApi
+```
+
+Make sure it builds: `dotnet build`
+
+Open the solution in Visual Studio, then for each project:
+
+- disable nullables
+- enable implicit
 
 ```html
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 ```
 
-### Lesson 3.6: Project References
-
-Project refs:
-
-- Application -> Domain, Common
-- Infrastructure -> Application
-- WebApi -> Infrastructure
-
-### Lesson 3.7: Entity
-
-We only have one entity `Employee` in _Domain_ project.
-
-### Lesson 3.8: Nuget Packages
-
-In _Infrastructure_ we add EF packages:
-
-- Microsoft.EntityFrameworkCore
-- (x) Microsoft.EntityFrameworkCore.SqlServer
-- (in my case) Npgsql.EntityFrameworkCore.PostgreSQL
-- (could use) Microsoft.EntityFrameworkCore.InMemory
-- Microsoft.EntityFrameworkCore.Design
-- Microsoft.EntityFrameworkCore.Tools
-- Microsoft.AspNetCore.Identity.EntityFrameworkCore
-- Microsoft.IdentityModel.Tokens
-- Microsoft.IdentityModel.JsonWebTokens
-
-### Lesson 3.9: Db Context - ORM
-
-We add class _Infrastructure\Context\ApplicationDbContext.cs_ which is the identity DB context.
-
-It defines what tables will be created with migration.
-Some of provided classes we can inherit and extend, so that we customize and add table columns.
-
-We add class _Infrastructure\ServiceCollectionExtensions.cs_ that is used to wire up DI.
-Then we add the Db service in _WebApi\Program.cs_:
-
-```csharp
-builder.Services.AddControllers();
-builder.Services.AddDatabase(builder.Configuration); // add Db service
-
-```
-
-### Lesson 3.13: Db Context - ORM
+Right click on "WebApi" in solution explorer and make it a startup project.
