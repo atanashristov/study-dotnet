@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
+// Helpers to wire up the DI
+
 namespace Infrastructure
 {
     public static class ServiceCollectionExtensions

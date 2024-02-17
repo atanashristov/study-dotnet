@@ -55,3 +55,21 @@ In _Infrastructure_ we add EF packages:
 - Microsoft.AspNetCore.Identity.EntityFrameworkCore
 - Microsoft.IdentityModel.Tokens
 - Microsoft.IdentityModel.JsonWebTokens
+
+### Lesson 3.9: Db Context - ORM
+
+We add class _Infrastructure\Context\ApplicationDbContext.cs_ which is the identity DB context.
+
+It defines what tables will be created with migration.
+Some of provided classes we can inherit and extend, so that we customize and add table columns.
+
+We add class _Infrastructure\ServiceCollectionExtensions.cs_ that is used to wire up DI.
+Then we add the Db service in _WebApi\Program.cs_:
+
+```csharp
+builder.Services.AddControllers();
+builder.Services.AddDatabase(builder.Configuration); // add Db service
+
+```
+
+### Lesson 3.13: Db Context - ORM

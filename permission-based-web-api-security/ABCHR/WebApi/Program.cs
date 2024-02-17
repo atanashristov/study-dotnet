@@ -16,7 +16,7 @@ builder.Services.AddCors(o =>
     ));
 
 builder.Services.AddControllers();
-builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddDatabase(builder.Configuration); // add Db service
 builder.Services.AddIdentitySettings();
 builder.Services.AddApplicationServices();
 builder.Services.AddJwtAuthentication(builder.Services.GetApplicationSettings(builder.Configuration));
