@@ -1,0 +1,23 @@
+﻿<UserCard Style="background-color: var(--mud-palette-drawer-background);color: var(--mud-palette-drawer-text);"/>
+
+<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Class="my-1" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+    <MudNavLink Href="/account" Icon="@Icons.Material.Outlined.LockPerson">Account</MudNavLink>
+    @if (_canViewEmployees)
+    {
+        <MudNavLink Href="/pages/employee-list" Icon="@Icons.Material.Outlined.People">Employees</MudNavLink>
+    }
+    @if (_canViewRoles || _canViewRoles)
+    {
+        <MudNavGroup Title="Administration" Icon="@Icons.Material.Outlined.Security" HideExpandIcon="false">
+            @if (_canViewUsers)
+            {
+                <MudNavLink Href="pages/identity/users" Icon="@Icons.Material.Outlined.Person">Users</MudNavLink>
+            }
+            @if (_canViewRoles)
+            {
+                <MudNavLink Href="pages/identity/roles" Icon="@Icons.Material.Outlined.Lock">Roles</MudNavLink>
+            }
+        </MudNavGroup>
+    }
+</MudNavMenu>

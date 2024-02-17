@@ -1,0 +1,72 @@
+﻿@page "/pages/identity/users"
+@using Common.Authorization;
+@using Common.Responses.Identity;
+
+@attribute [MustHavePermission(AppFeature.Users, AppAction.Read)]
+
+<style>
+    .mud-table-container {
+        overflow: auto;
+    }
+</style>
+
+<Header OnClose="Cancel" Title="Users" Description="Manage Users" />
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudTable Hover="true" Elevation="25" Items="_userList" Dense="true" @bind-user="_user">
+        <ToolBarContent>
+            <div class="justify-center mud-text-align-center">
+                @if (_canCreateUsers)
+                {
+                    <MudFab OnClick="(() => UserRegistrationDialog())" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
+                            IconSize="Size.Medium" Class="mr-2" DisableElevation="true" aria-label="add" />
+                }
+            </div>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<UserResponse, object>(x => x.FirstName)">First Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<UserResponse, object>(x => x.LastName)">Last Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<UserResponse, object>(x => x.UserName)">UserName</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<UserResponse, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<UserResponse, object>(x => x.PhoneNumber)">Phone No</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<UserResponse, object>(x => x.EmailConfirmed)">Email Confirmation</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<UserResponse, object>(x => x.IsActive)">Active</MudTableSortLabel></MudTh>
+            <MudTh Style="text-align:right">Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="FirstName">
+                <MudHighlighter Text="@context.FirstName" />
+            </MudTd>
+            <MudTd DataLabel="LastName">
+                <MudHighlighter Text="@context.LastName" />
+            </MudTd>
+            <MudTd DataLabel="UserName">
+                <MudHighlighter Text="@context.UserName" />
+            </MudTd>
+            <MudTd DataLabel="Email">
+                <MudHighlighter Text="@context.Email" />
+            </MudTd>
+            <MudTd DataLabel="PhoneNumber">
+                <MudHighlighter Text="@context.PhoneNumber" />
+            </MudTd>
+            <MudTd DataLabel="Email Confirmed"><MudCheckBox @bind-Checked="@context.EmailConfirmed" ReadOnly Color="Color.Secondary"></MudCheckBox></MudTd>
+            <MudTd DataLabel="Active"><MudCheckBox @bind-Checked="@context.IsActive" ReadOnly Color="Color.Secondary"></MudCheckBox></MudTd>
+            <MudTd DataLabel="Actions" Style="text-align:right">
+                <MudMenu DisableElevation="true" Dense="true" Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary" TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                    <MudMenuItem >View Profile</MudMenuItem>
+                    @if (_canViewRoles)
+                    {
+                        <MudMenuItem OnClick="(() => ManageUserRoles(context.Id, context.Email))">Manage Roles</MudMenuItem>
+                    }
+                </MudMenu>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager/>
+        </PagerContent>
+    </MudTable>
+}

@@ -1,0 +1,9 @@
+Assignment 5 - Create resources for getting list of all users in our database
+
+Consider the following
+
+	- Add GetAllUsersAsync() in IUserService, then implement it in UserService
+		** Remember to map from List<ApplicationUser> to List<UserResponse>
+	- Add GetAllUsersQuery and its handlers
+	- Add api endpoint(HttpGet) in UsersController
+	- Test this endpoint

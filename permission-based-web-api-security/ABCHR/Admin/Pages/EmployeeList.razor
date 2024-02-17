@@ -1,0 +1,81 @@
+﻿@page "/pages/employee-list"
+@using Common.Authorization;
+@using Common.Responses.Employees;
+
+@attribute [MustHavePermission(AppFeature.Employees, AppAction.Read)]
+
+<style>
+    .mud-table-container {
+        overflow: auto;
+    }
+</style>
+
+<Header OnClose="Cancel" Title="Users" Description="Manage Users" />
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudTable Hover="true" Elevation="25" Items="_employeeList" Dense="true" @bind-user="_employee">
+        <ToolBarContent>
+            <div class="justify-center mud-text-align-center">
+                @if (_canCreateEmployees)
+                {
+                    <MudFab Color="Color.Success" Icon="@Icons.Material.Filled.Add" Size="Size.Small"
+                            IconSize="Size.Medium" Class="mr-2" DisableElevation="true" aria-label="add" />
+                }
+            </div>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<EmployeeResponse, object>(x => x.FirstName)">Firstname</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EmployeeResponse, object>(x => x.LastName)">Lastname</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EmployeeResponse, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EmployeeResponse, object>(x => x.Salary)">Salary</MudTableSortLabel></MudTh>
+            <MudTh Style="text-align:right">Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Firstname">
+                <MudHighlighter Text="@context.FirstName" />
+            </MudTd>
+            <MudTd DataLabel="Lastname">
+                <MudHighlighter Text="@context.LastName" />
+            </MudTd>
+            <MudTd DataLabel="Email">
+                <MudHighlighter Text="@context.Email" />
+            </MudTd>
+            <MudTd DataLabel="PhoneNumber">
+                <MudHighlighter Text="@context.Salary.ToString("C")" />
+            </MudTd>
+            <MudTd DataLabel="Actions" Style="text-align:right">
+                @if (_canUpdateEmployees || _canDeleteEmployees)
+                {
+                    <MudMenu DisableElevation="true" Dense="true" Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" Size="Size.Small" Direction="Direction.Left" OffsetX="true">
+                        @if (_canUpdateEmployees)
+                        {
+                            <MudMenuItem >Edit</MudMenuItem>
+                        }
+                        @if (_canDeleteEmployees)
+                        {
+                            <MudMenuItem >Delete</MudMenuItem>
+                        }
+                    </MudMenu>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled"
+                               DisableElevation="true"
+                               StartIcon="@Icons.Material.Filled.DoNotTouch"
+                               IconColor="Color.Error"
+                               Size="Size.Small"
+                               Color="Color.Surface">
+                        No Permissions
+                    </MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
