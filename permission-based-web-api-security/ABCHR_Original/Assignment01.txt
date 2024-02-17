@@ -1,0 +1,12 @@
+Assigment 01 - Seed Admin ApplicationUser
+
+Create a function/method that seed ApplicationUser to database
+Consider the following
+	- Username should be genearated from email but do not include characters from @, 
+		example: 'juniorm@gmail.com' should be 'juniorm'
+	- Normalized properties should all be in upper cases
+	- User should be Active
+	- Check if the user with the same email does not exists before creating and no duplication is allowed
+	- Password must be hashed, use new PasswordHasher<ApplicationUser>() to achieve this
+Assign this user to both Basic and Admin roles, remember admin MUST has all permissions
+	- Check if not already in roles [Admin and basic]

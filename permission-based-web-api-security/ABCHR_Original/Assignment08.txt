@@ -1,0 +1,9 @@
+Assignment 08 - Add resources to update a Role
+	
+	- Add UpdateRoleRequest
+	- Add UpdateRoleAsync() and implement it
+	- Add UpdateRoleCommand and its handler
+	- Add [HttpPut] endpoint to update a role
+	- Test it
+
+	Note: Admin role cannot be updated(changed)

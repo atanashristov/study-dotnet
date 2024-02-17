@@ -1,0 +1,24 @@
+Assignment 04
+
+Create Employee Resources as following
+	- Request classes (Common)
+		- CreateEmployeeRequest
+		- UpdateEmployeeRequest
+	- Response class (Common)
+		- EmployeeResponse
+	- IEmployeeService(Application)
+	- EmployeeService(Infrastructure)
+	- Install and Use AutoMapper(Application) - Mapping Profile
+	- Register AutoMapper to DI(Application)
+	- Features
+		- Employees
+			- Commands
+				- CreateEmployeeCommand
+				- UpdateEmployeeCommand
+				- DeleteEmployeeCommand
+			- Queries
+				- GetEmployeesQuery
+				- GetEmployeeByIdQuery
+	- Register Employee service to DI(Infrastructure) > Add to Program.cs
+	- Add EmployeesController : MyBaseController<EmployeesController>
+	with CRUD endpoints and Correct permissions

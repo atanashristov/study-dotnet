@@ -1,0 +1,10 @@
+Assignment 06 - Add resources to change user status
+
+Consider the following
+
+	- Add ChangeUserStatusRequest class with appropriate properties
+	- Add ChangeUserStatusAsync() in IUserService, then implement it in UserService
+		** Do this using ApplicationUser property 'IsActive'
+	- Add ChangeUserStatusCommand and its handler
+	- Add api endpoint(HttpPut("change-status")) in UsersController
+	- Test this endpoint

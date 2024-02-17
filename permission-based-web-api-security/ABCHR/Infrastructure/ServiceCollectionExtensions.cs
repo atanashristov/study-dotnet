@@ -6,6 +6,7 @@ using Infrastructure.Services.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace Infrastructure
@@ -15,7 +16,7 @@ namespace Infrastructure
         public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ApplicationDbContext>(options => options
-                .UseSqlServer(configuration.GetConnectionString("DefaultConnection")))
+                .UseNpgsql(configuration.GetConnectionString("ABCHRDbConnection")))
                 .AddTransient<ApplicationDbSeeeder>();
             return services;
         }

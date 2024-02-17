@@ -1,0 +1,5 @@
+Assignment 03 - AddSwaggerGen() custom extension method
+
+Add extension method that register SwaggerGen to allow use of JWT usage from swagger UI
+	- AddSecurityDefinition
+	- AddSecurityRequirement

@@ -6,9 +6,8 @@ using Common.Responses.Wrappers;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -120,13 +119,14 @@ namespace Infrastructure.Services.Identity
 
         private string GenerateEncrytedToken(SigningCredentials signingCredentials, IEnumerable<Claim> claims)
         {
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_appConfiguration.TokenExpiryInMinutes),
-                signingCredentials: signingCredentials);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var encryptedToken = tokenHandler.WriteToken(token);
-            return encryptedToken;
+            //var token = new JsonWebToken(
+            //    claims: claims,
+            //    expires: DateTime.UtcNow.AddMinutes(_appConfiguration.TokenExpiryInMinutes),
+            //    signingCredentials: signingCredentials);
+            //var tokenHandler = new JwtSecurityTokenHandler();
+            //var encryptedToken = tokenHandler.WriteToken(token);
+            //return encryptedToken;
+            return "";
         }
 
         private SigningCredentials GetSigningCredentials()
@@ -176,16 +176,18 @@ namespace Infrastructure.Services.Identity
                 RoleClaimType = ClaimTypes.Role,
                 ClockSkew = TimeSpan.Zero
             };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-            if (securityToken is not JwtSecurityToken jwtSecurityToken 
-                || !jwtSecurityToken.Header.Alg
-                .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new SecurityTokenException("Invalid token");
-            }
+            //var tokenHandler = new JwtSecurityTokenHandler();
+            //var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+            //if (securityToken is not JwtSecurityToken jwtSecurityToken 
+            //    || !jwtSecurityToken.Header.Alg
+            //    .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            //{
+            //    throw new SecurityTokenException("Invalid token");
+            //}
 
-            return principal;
+            //return principal;
+
+            return new ClaimsPrincipal();
         }
     }
 }
