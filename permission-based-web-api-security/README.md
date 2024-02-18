@@ -398,15 +398,3 @@ abchrdb_dev=> \d "Security"."Users"
  FirstName              | character varying(128)   |           |          |
  LastName               | character varying(128)   |           |          | ...
 ```
-
-### Change all PKs to Guid
-
-By the way, this is how in Postgres one can generate UUID:
-
-```sql
-abchrdb_dev=> select * from gen_random_uuid();
-           gen_random_uuid
---------------------------------------
- 44f7c6f2-df18-4893-aa83-2e736f246028
-(1 row)
-```

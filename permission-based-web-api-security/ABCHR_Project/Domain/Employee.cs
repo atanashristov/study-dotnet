@@ -4,7 +4,7 @@ namespace Domain
 {
     public class Employee
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(128)]

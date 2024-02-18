@@ -30,30 +30,30 @@ namespace Infrastructure.DbConfig
                 .ToTable("RoleClaims", SchemaNames.Security);
         }
     }
-    internal class IdentityUserRoleConfig : IEntityTypeConfiguration<IdentityUserRole<Guid>>
+    internal class IdentityUserRoleConfig : IEntityTypeConfiguration<IdentityUserRole<string>>
     {
-        public void Configure(EntityTypeBuilder<IdentityUserRole<Guid>> builder) =>
+        public void Configure(EntityTypeBuilder<IdentityUserRole<string>> builder) =>
             builder
                 .ToTable("UserRoles", SchemaNames.Security);
     }
 
-    internal class IdentityUserClaimConfig : IEntityTypeConfiguration<IdentityUserClaim<Guid>>
+    internal class IdentityUserClaimConfig : IEntityTypeConfiguration<IdentityUserClaim<string>>
     {
-        public void Configure(EntityTypeBuilder<IdentityUserClaim<Guid>> builder) =>
+        public void Configure(EntityTypeBuilder<IdentityUserClaim<string>> builder) =>
             builder
                 .ToTable("UserClaims", SchemaNames.Security);
     }
 
-    internal class IdentityUserLoginConfig : IEntityTypeConfiguration<IdentityUserLogin<Guid>>
+    internal class IdentityUserLoginConfig : IEntityTypeConfiguration<IdentityUserLogin<string>>
     {
-        public void Configure(EntityTypeBuilder<IdentityUserLogin<Guid>> builder) =>
+        public void Configure(EntityTypeBuilder<IdentityUserLogin<string>> builder) =>
             builder
                 .ToTable("UserLogins", SchemaNames.Security);
     }
 
-    internal class IdentityUserTokenConfig : IEntityTypeConfiguration<IdentityUserToken<Guid>>
+    internal class IdentityUserTokenConfig : IEntityTypeConfiguration<IdentityUserToken<string>>
     {
-        public void Configure(EntityTypeBuilder<IdentityUserToken<Guid>> builder) =>
+        public void Configure(EntityTypeBuilder<IdentityUserToken<string>> builder) =>
             builder
                 .ToTable("UserTokens", SchemaNames.Security);
     }
