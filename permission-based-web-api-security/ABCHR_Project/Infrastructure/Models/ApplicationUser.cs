@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Models
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser<Guid>
     {
         [MaxLength(128)]
         public string FirstName { get; set; }
