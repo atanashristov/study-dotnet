@@ -398,3 +398,45 @@ abchrdb_dev=> \d "Security"."Users"
  FirstName              | character varying(128)   |           |          |
  LastName               | character varying(128)   |           |          | ...
 ```
+
+### Change all PKs to Guid
+
+There is a rolled back commit with converted the PKs to Guid.
+
+By the way, this is how in Postgres one can generate UUID:
+
+```sql
+abchrdb_dev=> select * from gen_random_uuid();
+           gen_random_uuid
+--------------------------------------
+ 44f7c6f2-df18-4893-aa83-2e736f246028
+(1 row)
+```
+
+## Section 4: Authentication Constants
+
+Every user is assign a role.
+Every role is assigned permissions.
+Every permission is on an application feature:
+
+- We perform actions on these features.
+- To this specific feature, you are permitted to apply these actions.
+
+We add the **features** in `Common\Authorization\AppFeature.cs` such as "Employees", "Users", "Roles", etc.
+
+Then the **actions** in `Common\Authorization\AppAction.cs` such as "Create", "Read", "Update", "Delete".
+
+Then the **claims** in `Common\Authorization\AppClaim.cs` such as "permission" and "exp" (for the JSON web token expiration time). We can add user full name, phone number etc, as needed...
+
+We add **role group** in `Common\Authorization\AppRoleGroup.cs` such as "SystemAccess", "ManagementHierarchy".
+
+We add **roles** in `Common\Authorization\AppRoles.cs` such as "Admin", "Basic". These are the _default roles_ that are _created with the application_. We _seed these_ to the DB.
+
+We add **default credentials** in `Common\Authorization\AppCredentials.cs`. We could also use configuration instead of hardcoding.
+
+We add **permissions** in `Common\Authorization\AppPermission.cs` such as "Create Users", "Update Users", etc. The permission consists of feature and action.
+
+Basic permission is where:
+
+- When we create an user it gets only the basic permissions
+- Any application role can read the employees, that's why this is a basic permission
