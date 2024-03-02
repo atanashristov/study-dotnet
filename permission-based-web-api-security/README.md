@@ -440,3 +440,25 @@ Basic permission is where:
 
 - When we create an user it gets only the basic permissions
 - Any application role can read the employees, that's why this is a basic permission
+
+## Section 5: Seeding the Db
+
+We add users, roles and grand permissions to these roles.
+
+We add in Db seeder class in `Infrastructure\Context\ApplicationDbSeeeder.cs`.
+
+It associates the ASP.Net identity models with the application models:
+
+```csharp
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+```
+
+We add `WebApi\ServiceCollectionExtensions.cs` for initialization of service providers and running the DB seeder.
+
+Then call the DB seeder from `Program.cs`:
+
+```csharp
+var app = builder.Build();
+app.SeedDatabase();
+```
