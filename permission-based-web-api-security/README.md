@@ -40,6 +40,8 @@ dotnet add Infrastructure package Microsoft.EntityFrameworkCore.Tools
 dotnet add Infrastructure package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 dotnet add Infrastructure package Microsoft.IdentityModel.Tokens
 dotnet add Infrastructure package Microsoft.IdentityModel.JsonWebTokens
+dotnet add Infrastructure package Microsoft.AspNetCore.Authorization
+dotnet add Infrastructure package Microsoft.AspNetCore.Identity
 
 dotnet add WebApi package Microsoft.EntityFrameworkCore.Design
 ```
@@ -454,7 +456,7 @@ It associates the ASP.Net identity models with the application models:
         private readonly RoleManager<ApplicationRole> _roleManager;
 ```
 
-We add `WebApi\ServiceCollectionExtensions.cs` for initialization of service providers and running the DB seeder.
+We add `\Infrastructure\ServiceCollectionExtensions.cs` for initialization of service providers and running the DB seeder.
 
 Then call the DB seeder from `Program.cs`:
 
@@ -462,3 +464,20 @@ Then call the DB seeder from `Program.cs`:
 var app = builder.Build();
 app.SeedDatabase();
 ```
+
+## Section 6: Permissions Resources
+
+We setup requirement.
+Then we add authorization handler.
+And there we handle/verify if the user can access specific resource.
+For that we will need a permission policy provider.
+
+As the permission requirements grow, at run time we keep adding them to the list that we created here `Common\Authorization\AppPermission.cs`.
+
+We add the following 3 classes:
+
+- \Infrastructure\Permissions\PermissionRequirement.cs
+- \Infrastructure\Permissions\PermissionAuthorizationHandler.cs
+- \Infrastructure\Permissions\PermissionPolicyProvider.cs
+
+Register these in DI (`\Infrastructure\ServiceCollectionExtensions.cs`).
