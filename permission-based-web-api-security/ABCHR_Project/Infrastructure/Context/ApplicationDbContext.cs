@@ -11,7 +11,7 @@ namespace Infrastructure.Context
             IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>,
             ApplicationRoleClaim, IdentityUserToken<string>>
     {
-        public ApplicationDbContext(DbContextOptions options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {}
 

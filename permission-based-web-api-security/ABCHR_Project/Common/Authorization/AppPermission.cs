@@ -9,7 +9,7 @@ namespace Common.Authorization
     {
         public string Name => NameFor(Feature, Action);
 
-        private static string NameFor(string feature, string action)
+        public static string NameFor(string feature, string action)
         {
             return $"Permissions.{feature}.{action}";
         }

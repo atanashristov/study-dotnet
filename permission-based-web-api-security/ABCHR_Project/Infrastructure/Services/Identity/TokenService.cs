@@ -1,7 +1,6 @@
 ﻿using Application.AppConfigs;
 using Application.Services.Identity;
 using Common.Requests.Identity;
-using Common.Responses;
 using Common.Responses.Identity;
 using Common.Responses.Wrappers;
 using Infrastructure.Models;
@@ -57,7 +56,7 @@ namespace Infrastructure.Services.Identity
             }
             // generate refresh token
             user.RefreshToken = GenerateRefreshToken();
-            user.RefreshTokenExpiryDate = DateTime.Now.AddDays(7);
+            user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(7);
             // Updated user
             await _userManager.UpdateAsync(user);
 
@@ -81,7 +80,7 @@ namespace Infrastructure.Services.Identity
             {
                 return await ResponseWrapper<TokenResponse>.FailAsync("Invalid Client Token.");
             }
-            var userPrincipal = GetPrincipalFromExpiredToken(refreshTokenRequest.Token);
+            var userPrincipal = await GetPrincipalFromExpiredToken(refreshTokenRequest.Token);
             var userEmail = userPrincipal.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(userEmail);
 
@@ -120,14 +119,15 @@ namespace Infrastructure.Services.Identity
 
         private string GenerateEncrytedToken(SigningCredentials signingCredentials, IEnumerable<Claim> claims)
         {
-            //var token = new JsonWebToken(
-            //    claims: claims,
-            //    expires: DateTime.UtcNow.AddMinutes(_appConfiguration.TokenExpiryInMinutes),
-            //    signingCredentials: signingCredentials);
-            //var tokenHandler = new JwtSecurityTokenHandler();
-            //var encryptedToken = tokenHandler.WriteToken(token);
-            //return encryptedToken;
-            return "";
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(_appConfiguration.TokenExpiryInMinutes),
+                SigningCredentials = signingCredentials,
+            };
+            var tokenHandler = new JsonWebTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return token;
         }
 
         private SigningCredentials GetSigningCredentials()
@@ -154,10 +154,10 @@ namespace Infrastructure.Services.Identity
             var claims = new List<Claim>
             {
                 new (ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Email, user.Email),
-                new(ClaimTypes.Name, user.FirstName),
-                new(ClaimTypes.Surname, user.LastName),
-                new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty)
+                new (ClaimTypes.Email, user.Email),
+                new (ClaimTypes.Name, user.FirstName),
+                new (ClaimTypes.Surname, user.LastName),
+                new (ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty)
             }
             .Union(userClaims)
             .Union(roleClaims)
@@ -166,29 +166,29 @@ namespace Infrastructure.Services.Identity
             return claims;
         }
 
-        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        private async Task<ClaimsPrincipal> GetPrincipalFromExpiredToken(string token)
         {
+            var secret = Encoding.UTF8.GetBytes(_appConfiguration.Secret);
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appConfiguration.Secret)),
                 ValidateIssuer = false,
                 ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(secret),
                 RoleClaimType = ClaimTypes.Role,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
             };
-            //var tokenHandler = new JwtSecurityTokenHandler();
-            //var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-            //if (securityToken is not JwtSecurityToken jwtSecurityToken 
-            //    || !jwtSecurityToken.Header.Alg
-            //    .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            //{
-            //    throw new SecurityTokenException("Invalid token");
-            //}
+            var tokenHandler = new JsonWebTokenHandler();
+            var validationResult = await tokenHandler.ValidateTokenAsync(token, tokenValidationParameters);
+            if (validationResult.SecurityToken is not JsonWebToken jsonWebToken
+                || !jsonWebToken.Alg
+                .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
 
-            //return principal;
-
-            return new ClaimsPrincipal();
+            return new ClaimsPrincipal(validationResult.ClaimsIdentity);
         }
     }
 }

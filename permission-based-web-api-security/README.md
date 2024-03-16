@@ -42,8 +42,13 @@ dotnet add Infrastructure package Microsoft.IdentityModel.Tokens
 dotnet add Infrastructure package Microsoft.IdentityModel.JsonWebTokens
 dotnet add Infrastructure package Microsoft.AspNetCore.Authorization
 dotnet add Infrastructure package Microsoft.AspNetCore.Identity
+dotnet add Infrastructure package Microsoft.AspNetCore.Authentication.JwtBearer
 
 dotnet add WebApi package Microsoft.EntityFrameworkCore.Design
+dotnet add Application package MediatR
+dotnet add Application package FluentValidation
+dotnet add Application package FluentValidation.DependencyInjectionExtensions
+dotnet add Application package AutoMapper
 ```
 
 Notes:
@@ -481,3 +486,9 @@ We add the following 3 classes:
 - \Infrastructure\Permissions\PermissionPolicyProvider.cs
 
 Register these in DI (`\Infrastructure\ServiceCollectionExtensions.cs`).
+
+## Section 7-10: Token Service, Mediator, Token Queries, Controllers, DI Container
+
+For the token queries we install `Mediator` that helps us to implement CQRS pattern.
+
+More packages to install:
