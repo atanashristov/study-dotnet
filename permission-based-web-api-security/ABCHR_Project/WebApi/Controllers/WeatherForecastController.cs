@@ -21,8 +21,8 @@ namespace WebApi.Controllers
             _logger = logger;
         }
 
-        [MustHavePermission(AppFeature.Employees, AppAction.Read)]
         [HttpGet(Name = "GetWeatherForecast")]
+        [MustHavePermission(AppFeature.Employees, AppAction.Read)]
         public IEnumerable<WeatherForecast> Get()
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast

@@ -1,12 +1,13 @@
 ﻿using Application.AppConfigs;
-using Application.Features.Identity.Token.Queries;
 using Application.Pipelines;
+using Application.Services.Employees;
 using Application.Services.Identity;
 using Common.Authorization;
 using Common.Responses.Wrappers;
 using FluentValidation;
 using Infrastructure.Context;
 using Infrastructure.Models;
+using Infrastructure.Services;
 using Infrastructure.Services.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -49,14 +50,23 @@ namespace WebApi
 
         internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            var assembly = Assembly.GetExecutingAssembly();
             return services
                 .AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
-                    Assembly.GetAssembly(typeof(GetTokenQuery))
+                    Assembly.GetAssembly(typeof(Application.Features.Identity.Token.Queries.GetTokenQuery))
                 ))
-                .AddAutoMapper(assembly)
+                .AddAutoMapper(
+                    Assembly.GetExecutingAssembly(),
+                    Assembly.GetAssembly(typeof(Application.Features.Identity.Token.Queries.GetTokenQuery))
+                )
                 .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly())
                 .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehaviour<,>));
+        }
+
+        public static IServiceCollection AddEmployeeServices(this IServiceCollection services)
+        {
+            services
+                .AddTransient<IEmployeeService, EmployeeService>();
+            return services;
         }
 
         internal static IServiceCollection AddIdentityServices(this IServiceCollection services)

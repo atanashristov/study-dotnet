@@ -1,4 +1,3 @@
-using Infrastructure;
 using WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +5,7 @@ builder.Services.AddControllers();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddIdentitySettings();
 builder.Services.AddApplicationServices();
+builder.Services.AddEmployeeServices();
 builder.Services.AddJwtAuthentication(builder.Services.GetApplicationSettings(builder.Configuration));
 builder.Services.AddIdentityServices();
 // Add services to the container.

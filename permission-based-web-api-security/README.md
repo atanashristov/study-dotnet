@@ -491,4 +491,6 @@ Register these in DI (`\Infrastructure\ServiceCollectionExtensions.cs`).
 
 For the token queries we install `Mediator` that helps us to implement CQRS pattern.
 
-More packages to install:
+## Section 11: End to end - Employees
+
+Usin `Automapper`.

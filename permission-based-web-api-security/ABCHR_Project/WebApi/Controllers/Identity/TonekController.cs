@@ -1,5 +1,7 @@
 ﻿using Application.Features.Identity.Token.Queries;
 using Common.Requests.Identity;
+using Common.Responses.Identity;
+using Common.Responses.Wrappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +12,7 @@ namespace WebApi.Controllers.Identity
     {
         [HttpPost("get-token")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequest tokenRequest)
+        public async Task<ActionResult<IResponseWrapper<TokenResponse>>> GetTokenAsync([FromBody] TokenRequest tokenRequest)
         {
             var response = await MediatorSender.Send(new GetTokenQuery { TokenRequest = tokenRequest });
             if (response.IsSuccessful)
@@ -21,7 +23,7 @@ namespace WebApi.Controllers.Identity
         }
 
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> GetRefreshTokenAsync([FromBody] RefreshTokenRequest refreshTokenRequest)
+        public async Task<ActionResult<IResponseWrapper<TokenResponse>>> GetRefreshTokenAsync([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
             var response = await MediatorSender.Send(
                 new GetRefreshTokenQuery { RefreshTokenRequest = refreshTokenRequest });
