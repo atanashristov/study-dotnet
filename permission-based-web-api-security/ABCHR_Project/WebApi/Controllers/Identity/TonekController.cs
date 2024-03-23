@@ -1,9 +1,11 @@
-﻿using Application.Features.Identity.Token.Queries;
+﻿using System.Net;
+using Application.Features.Identity.Token.Queries;
 using Common.Requests.Identity;
 using Common.Responses.Identity;
 using Common.Responses.Wrappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebApi.Controllers.Identity
 {
@@ -12,6 +14,8 @@ namespace WebApi.Controllers.Identity
     {
         [HttpPost("get-token")]
         [AllowAnonymous]
+        [SwaggerResponse((int)HttpStatusCode.OK, "User details successfully updated", typeof(IResponseWrapper))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, "Wrong login, User deactivated, etc.", Type = typeof(IResponseWrapper))]
         public async Task<ActionResult<IResponseWrapper<TokenResponse>>> GetTokenAsync([FromBody] TokenRequest tokenRequest)
         {
             var response = await MediatorSender.Send(new GetTokenQuery { TokenRequest = tokenRequest });

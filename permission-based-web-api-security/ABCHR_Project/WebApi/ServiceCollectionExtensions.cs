@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
@@ -56,7 +57,8 @@ namespace WebApi
                 ))
                 .AddAutoMapper(
                     Assembly.GetExecutingAssembly(),
-                    Assembly.GetAssembly(typeof(Application.Features.Identity.Token.Queries.GetTokenQuery))
+                    Assembly.GetAssembly(typeof(Application.MappingProfiles)),
+                    Assembly.GetAssembly(typeof(Infrastructure.MappingProfiles))
                 )
                 .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly())
                 .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehaviour<,>));
@@ -73,7 +75,9 @@ namespace WebApi
         {
             services
                 .AddTransient<ITokenService, TokenService>()
-                .AddHttpContextAccessor();
+                .AddTransient<IUserService, UserService>()
+                .AddHttpContextAccessor()
+                .AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }
@@ -226,7 +230,22 @@ namespace WebApi
                         Url = new Uri("https://opensource.org/licenses/MIT")
                     }
                 });
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+
+                options.EnableAnnotations();
+                options.ExampleFilters();
+                options.OperationFilter<AddResponseHeadersFilter>();
+                
+                // Adds "(Auth)" to the summary so that you can see which endpoints have Authorization
+                // or use the generic method, e.g. c.OperationFilter<AppendAuthorizeToSummaryOperationFilter<MyCustomAttribute>>();
+                options.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
             });
+
+            services.AddSwaggerExamples();
         }
     }
 }
