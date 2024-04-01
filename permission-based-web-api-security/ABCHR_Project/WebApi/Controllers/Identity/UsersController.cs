@@ -65,7 +65,7 @@ namespace WebApi.Controllers.Identity
 
         [HttpGet]
         [MustHavePermission(AppFeature.Users, AppAction.Read)]
-        [SwaggerResponse((int)HttpStatusCode.OK, "Returns the user", typeof(IResponseWrapper<UserResponse>))]
+        [SwaggerResponse((int)HttpStatusCode.OK, "Returns the user", typeof(IResponseWrapper<List<UserResponse>>))]
         [SwaggerResponse((int)HttpStatusCode.Unauthorized, "Expired token", Type = typeof(IResponseWrapper))]
         [SwaggerResponse((int)HttpStatusCode.Forbidden, "Not authorized", Type = typeof(IResponseWrapper))]
         public async Task<ActionResult<IResponseWrapper<List<UserResponse>>>> GetAllUsers()
@@ -128,7 +128,11 @@ namespace WebApi.Controllers.Identity
 
         [HttpGet("roles/{userId}")]
         [MustHavePermission(AppFeature.Roles, AppAction.Read)]
-        public async Task<IActionResult> GetRoles(string userId)
+        [SwaggerResponse((int)HttpStatusCode.OK, "Returns list of user's roles", typeof(IResponseWrapper <List<UserRoleViewModel>>))]
+        [SwaggerResponse((int)HttpStatusCode.NotFound, "User not found", Type = typeof(IResponseWrapper))]
+        [SwaggerResponse((int)HttpStatusCode.Unauthorized, "Expired token", Type = typeof(IResponseWrapper))]
+        [SwaggerResponse((int)HttpStatusCode.Forbidden, "Not authorized", Type = typeof(IResponseWrapper))]
+        public async Task<ActionResult> GetRoles(string userId)
         {
             var response = await MediatorSender.Send(new GetRolesQuery { UserId = userId });
             if (response.IsSuccessful)
@@ -140,6 +144,10 @@ namespace WebApi.Controllers.Identity
 
         [HttpPut("user-roles")]
         [MustHavePermission(AppFeature.Users, AppAction.Update)]
+        [SwaggerResponse((int)HttpStatusCode.OK, "User roles  successfully updated", typeof(IResponseWrapper))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, "User Roles update not permitted", Type = typeof(IResponseWrapper))]
+        [SwaggerResponse((int)HttpStatusCode.Unauthorized, "Expired token", Type = typeof(IResponseWrapper))]
+        [SwaggerResponse((int)HttpStatusCode.Forbidden, "Not authorized", Type = typeof(IResponseWrapper))]
         public async Task<IActionResult> UpdateUserRoles([FromBody] UpdateUserRolesRequest updateUserRoles)
         {
             var response = await MediatorSender

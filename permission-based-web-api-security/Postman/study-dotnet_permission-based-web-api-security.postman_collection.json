@@ -1,0 +1,824 @@
+{
+	"info": {
+		"_postman_id": "578a51a5-392d-4803-ac44-682fc3caebed",
+		"name": "study-dotnet_permission-based-web-api-security",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "516776"
+	},
+	"item": [
+		{
+			"name": "swagger/index.html",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}swagger/index.html",
+					"host": [
+						"{{API_URL}}swagger"
+					],
+					"path": [
+						"index.html"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "swagger/v1/swagger.json",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}swagger/v1/swagger.json",
+					"host": [
+						"{{API_URL}}swagger"
+					],
+					"path": [
+						"v1",
+						"swagger.json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/token/get-token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"HTTP_RESPONSE_CODE\", pm.response.code);\r",
+							"pm.environment.set(\"JWT_TOKEN\", jsonData.responseData.token);\r",
+							"pm.environment.set(\"REFRESH_TOKEN\", jsonData.responseData.refreshToken);\r",
+							"pm.environment.set(\"REFRESH_TOKEN_EXPIRY_TIME\", jsonData.responseData.refreshTokenExpiryTime);\r",
+							"pm.environment.set(\"MESSAGES\", JSON.stringify(jsonData.messages));\r",
+							"pm.environment.set(\"IS_SUCCESSFUL\", jsonData.isSuccessful);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{LOGIN_EMAIL}}\",\r\n  \"password\": \"{{LOGIN_PASSWORD}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/token/get-token",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"token",
+						"get-token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/token/refresh-token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"HTTP_RESPONSE_CODE\", pm.response.code);\r",
+							"pm.environment.set(\"JWT_TOKEN\", jsonData.responseData.token);\r",
+							"pm.environment.set(\"REFRESH_TOKEN\", jsonData.responseData.refreshToken);\r",
+							"pm.environment.set(\"REFRESH_TOKEN_EXPIRY_TIME\", jsonData.responseData.refreshTokenExpiryTime);\r",
+							"pm.environment.set(\"MESSAGES\", JSON.stringify(jsonData.messages));\r",
+							"pm.environment.set(\"IS_SUCCESSFUL\", jsonData.isSuccessful);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"token\": \"{{JWT_TOKEN}}\",\r\n  \"refreshToken\": \"{{REFRESH_TOKEN}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/token/refresh-token",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"token",
+						"refresh-token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WeatherForecast",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}WeatherForecast",
+					"host": [
+						"{{API_URL}}WeatherForecast"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/employees",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/employees",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/employees/{{employeeId}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/employees/1",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"employees",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/employees",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Clementine\",\r\n  \"lastName\": \"Blake\",\r\n  \"email\": \"Clementine.Blake@corp.com\",\r\n  \"salary\": 99555\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/employees",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/employees",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 1,\r\n  \"firstName\": \"Lia\",\r\n  \"lastName\": \"Hamilton\",\r\n  \"email\": \"Lia.Hamilton@corp.com\",\r\n  \"salary\": 123123\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/employees",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/employees/{{employeeId}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 1,\r\n  \"firstName\": \"Lia\",\r\n  \"lastName\": \"Hamilton\",\r\n  \"email\": \"Lia.Hamilton@corp.com\",\r\n  \"salary\": 123123\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/employees/2",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"employees",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/users",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/{{userId}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/users/34fd6b86-948b-4da9-b7ec-c364d0dc3be6",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users",
+						"34fd6b86-948b-4da9-b7ec-c364d0dc3be6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Leia\",\r\n  \"lastName\": \"Farley\",\r\n  \"email\": \"Leia.Farley@corp.com\",\r\n  \"userName\": \"Leia.Farley\",\r\n  \"password\": \"Password123\",\r\n  \"comfirmPassword\": \"Password1234\",\r\n  \"phoneNumber\": \"469-444-2255\",\r\n  \"activateUser\": true,\r\n  \"autoComfirmEmail\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/users",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userId\": \"777fa26d-cb67-4cae-a2ff-60c106b80b98\",\r\n  \"firstName\": \"Leia\",\r\n  \"lastName\": \"Farley\",\r\n  \"phoneNumber\": \"469-444-2255\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/users",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/change-password",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userId\": \"777fa26d-cb67-4cae-a2ff-60c106b80b98\",\r\n  \"currentPassword\": \"Password123\",\r\n  \"newPassword\": \"Password123\",\r\n  \"confirmedNewPassword\": \"Password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/users/change-password",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users",
+						"change-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/change-status",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userId\": \"777fa26d-cb67-4cae-a2ff-60c106b80b98\",\r\n  \"activate\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/users/change-status",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users",
+						"change-status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/roles/{{userId}}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userId\": \"777fa26d-cb67-4cae-a2ff-60c106b80b98\",\r\n  \"activate\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/users/roles/34fd6b86-948b-4da9-b7ec-c364d0dc3be6",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users",
+						"roles",
+						"34fd6b86-948b-4da9-b7ec-c364d0dc3be6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/user-roles",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userId\": \"34fd6b86-948b-4da9-b7ec-c364d0dc3be6\",\r\n  \"roles\": [\r\n        {\r\n            \"roleName\": \"Admin\",\r\n            \"isAssignedToUser\": false\r\n        },\r\n        {\r\n            \"roleName\": \"Basic\",\r\n            \"isAssignedToUser\": true\r\n        }\r\n  ]\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/users/user-roles",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"users",
+						"user-roles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/roles",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/roles",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"roles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/roles{{roleId}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/roles/90dbd3d6-bc5f-4cb7-90fb-11c9750a8d27",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"roles",
+						"90dbd3d6-bc5f-4cb7-90fb-11c9750a8d27"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/roles",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"roleName\": \"Guest\",\r\n  \"roleDescription\": \"This is the guest role\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/roles",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"roles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/roles",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"roleId\": \"fbd0d4f1-4bc4-4f44-865e-beb18a4d43e6\",\r\n  \"roleName\": \"Guest\",\r\n  \"roleDescription\": \"This is the guest role\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/roles",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"roles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/roles{{roleId}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/roles/fbd0d4f1-4bc4-4f44-865e-beb18a4d43e6",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"roles",
+						"fbd0d4f1-4bc4-4f44-865e-beb18a4d43e6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/roles{{roleId}}/permissions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}api/roles/90dbd3d6-bc5f-4cb7-90fb-11c9750a8d27/permissions",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"roles",
+						"90dbd3d6-bc5f-4cb7-90fb-11c9750a8d27",
+						"permissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/roles{{roleId}}/permissions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"roleClaims\": [\r\n        {\r\n            \"claimType\": \"permission\",\r\n            \"claimValue\": \"Permissions.Employees.Read\",\r\n            \"description\": \"Read Employees\",\r\n            \"group\": \"ManagementHierarchy\",\r\n            \"isAssignedToRole\": true\r\n        },\r\n        {\r\n            \"claimType\": \"permission\",\r\n            \"claimValue\": \"Permissions.Employees.Create\",\r\n            \"description\": \"Create Employees\",\r\n            \"group\": \"ManagementHierarchy\",\r\n            \"isAssignedToRole\": false\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}api/roles/90dbd3d6-bc5f-4cb7-90fb-11c9750a8d27/permissions",
+					"host": [
+						"{{API_URL}}api"
+					],
+					"path": [
+						"roles",
+						"90dbd3d6-bc5f-4cb7-90fb-11c9750a8d27",
+						"permissions"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

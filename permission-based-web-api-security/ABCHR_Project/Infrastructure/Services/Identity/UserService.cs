@@ -4,6 +4,7 @@ using Common.Authorization;
 using Common.Requests.Identity;
 using Common.Responses.Identity;
 using Common.Responses.Wrappers;
+using Infrastructure.Extensions.IdentityResultExtensions;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +16,15 @@ namespace Infrastructure.Services.Identity
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IMapper _mapper;
-        //private readonly ICurrentUserService _currentUserService;
+        private readonly ICurrentUserService _currentUserService;
 
         public UserService(UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager, IMapper mapper/*, ICurrentUserService currentUserService*/)
+            RoleManager<ApplicationRole> roleManager, IMapper mapper, ICurrentUserService currentUserService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
-            //_currentUserService = currentUserService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<IResponseWrapper> GetUserByIdAsync(string userId)
@@ -78,7 +79,7 @@ namespace Infrastructure.Services.Identity
                 return await ResponseWrapper<string>.SuccessAsync(newUser.Id);
             }
 
-            return await ResponseWrapper.FailAsync(GetIdentityResultErrorDescriptions(identityResult));
+            return await ResponseWrapper.FailAsync(identityResult.GetErrorDescriptions());
         }
 
         public async Task<IResponseWrapper> GetAllUsersAsync()
@@ -109,7 +110,7 @@ namespace Infrastructure.Services.Identity
                 {
                     return await ResponseWrapper.SuccessAsync("User details successfully updated.");
                 }
-                return await ResponseWrapper.FailAsync(GetIdentityResultErrorDescriptions(identityResult));
+                return await ResponseWrapper.FailAsync(identityResult.GetErrorDescriptions());
             }
             return await ResponseWrapper.FailAsync("User does not exist.");
         }
@@ -128,7 +129,7 @@ namespace Infrastructure.Services.Identity
                 {
                     return await ResponseWrapper.SuccessAsync("User password updated.");
                 }
-                return await ResponseWrapper.FailAsync(GetIdentityResultErrorDescriptions(identityResult)); // TODO: Needs different HTTP status
+                return await ResponseWrapper.FailAsync(identityResult.GetErrorDescriptions()); // TODO: Needs different HTTP status
             }
             return await ResponseWrapper.FailAsync("User does not exist.");
         }
@@ -149,19 +150,9 @@ namespace Infrastructure.Services.Identity
                             : "User de-activated successfully");
                 }
                 return await ResponseWrapper
-                    .FailAsync(GetIdentityResultErrorDescriptions(identityResult));
+                    .FailAsync(identityResult.GetErrorDescriptions());
             }
             return await ResponseWrapper.FailAsync("User does not exist.");
-        }
-
-        private List<string> GetIdentityResultErrorDescriptions(IdentityResult identityResult)
-        {
-            var errorDescriptions = new List<string>();
-            foreach (var error in identityResult.Errors)
-            {
-                errorDescriptions.Add(error.Description);
-            }
-            return errorDescriptions;
         }
 
         public async Task<IResponseWrapper> GetRolesAsync(string userId)
@@ -212,27 +203,28 @@ namespace Infrastructure.Services.Identity
                     .Where(role => role.IsAssignedToUser == true)
                     .ToList();
 
-                //var currentLoggedInUser = await _userManager.FindByIdAsync(_currentUserService.UserId);
-                //if (currentLoggedInUser is null)
-                //{
-                //    return await ResponseWrapper.FailAsync("User does not exist.");
-                //}
+                var currentLoggedInUser = await _userManager.FindByIdAsync(_currentUserService.UserId);
+                if (currentLoggedInUser is null)
+                {
+                    return await ResponseWrapper.FailAsync("User does not exist.");
+                }
 
-                //if (await _userManager.IsInRoleAsync(currentLoggedInUser, AppRoles.Admin))
-                //{
-                //    var identityResult1 = await _userManager.RemoveFromRolesAsync(userInDb, currentAssignedRoles);
-                //    if (identityResult1.Succeeded)
-                //    {
-                //        var identityResult2 = await _userManager
-                //            .AddToRolesAsync(userInDb, rolesToBeAssigned.Select(role => role.RoleName));
-                //        if (identityResult2.Succeeded)
-                //        {
-                //            return await ResponseWrapper<string>.SuccessAsync("User Roles Updated Successfully.");
-                //        }
-                //        return await ResponseWrapper.FailAsync(GetIdentityResultErrorDescriptions(identityResult2));
-                //    }
-                //    return await ResponseWrapper.FailAsync(GetIdentityResultErrorDescriptions(identityResult1));
-                //}
+                if (await _userManager.IsInRoleAsync(currentLoggedInUser, AppRoles.Admin))
+                {
+                    var identityResult1 = await _userManager.RemoveFromRolesAsync(userInDb, currentAssignedRoles);
+                    if (identityResult1.Succeeded)
+                    {
+                        var identityResult2 = await _userManager
+                            .AddToRolesAsync(userInDb, rolesToBeAssigned.Select(role => role.RoleName));
+                        if (identityResult2.Succeeded)
+                        {
+                            return await ResponseWrapper<string>.SuccessAsync("User Roles Updated Successfully.");
+                        }
+                        return await ResponseWrapper.FailAsync(identityResult2.GetErrorDescriptions());
+                    }
+                    return await ResponseWrapper.FailAsync(identityResult1.GetErrorDescriptions());
+                }
+
                 return await ResponseWrapper.FailAsync("User Roles update not permitted.");
             }
 
