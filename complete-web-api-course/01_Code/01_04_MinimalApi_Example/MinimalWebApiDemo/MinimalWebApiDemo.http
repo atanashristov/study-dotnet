@@ -1,0 +1,49 @@
+@MinimalWebApiDemo_BaseUrl = http://localhost:5250
+
+### 1. Get Hello World
+GET {{MinimalWebApiDemo_BaseUrl}}/
+Accept: application/json
+
+### 2. Get Shirts
+# @name getShirts
+GET {{MinimalWebApiDemo_BaseUrl}}/shirts
+Accept: application/json
+
+### 3. Get Shirt by Id
+@firstItemId = {{getShirts.response.body.$[0].id}}
+GET {{MinimalWebApiDemo_BaseUrl}}/shirts/{{firstItemId}}
+Accept: application/json
+
+### 4. Create New Shirt
+# @name createShirt
+POST {{MinimalWebApiDemo_BaseUrl}}/shirts
+Content-Type: application/json
+
+{
+  "size": "L",
+  "color": "Blue",
+  "price": 19.99
+}
+
+### 5. Update Shirt
+@newItemId = {{createShirt.response.body.id}}
+PUT {{MinimalWebApiDemo_BaseUrl}}/shirts/{{newItemId}}
+Content-Type: application/json
+
+{
+  "id": "{{newItemId}}",
+  "size": "XL",
+  "color": "Red",
+  "price": 21.99
+}
+
+### 6. Patch Shirt
+PATCH {{MinimalWebApiDemo_BaseUrl}}/shirts/{{newItemId}}
+Content-Type: application/json
+
+{
+  "price": 18.99
+}
+
+### 7. Delete Shirt
+DELETE {{MinimalWebApiDemo_BaseUrl}}/shirts/{{newItemId}}
