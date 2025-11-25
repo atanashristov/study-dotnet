@@ -31,7 +31,7 @@ namespace WebAppiDemo.Models
 
         public double? Price { get; set; }
 
-        public Shirt ToEntity(int shirtId)
+        public Shirt ToEntity(int shirtId = 0)
         {
             return new Shirt
             {

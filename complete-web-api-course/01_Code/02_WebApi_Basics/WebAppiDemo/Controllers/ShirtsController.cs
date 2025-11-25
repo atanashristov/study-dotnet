@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WebAppiDemo.Models;
+using WebAppiDemo.Models.Repositories;
 using WebAppiDemo.Models.Validations;
 
 namespace WebAppiDemo.Controllers
@@ -8,17 +9,10 @@ namespace WebAppiDemo.Controllers
     [Route("api/[controller]")]
     public class ShirtsController : ControllerBase
     {
-        private static List<Shirt> shirts = new List<Shirt>
-            {
-                new Shirt { ShirtId = 1, Brand = "Nike", Color = "Red", Size = 10, Gender = "Male", Price = 29.99 },
-                new Shirt { ShirtId = 2, Brand = "Adidas", Color = "Blue", Size = 12, Gender = "Male", Price = 34.99 },
-                new Shirt { ShirtId = 3, Brand = "Puma", Color = "Green", Size = 8, Gender = "Female", Price = 24.99 }
-            };
-
         [HttpGet]
         public IActionResult GetShirts()
         {
-            return Ok(shirts);
+            return Ok(ShirtRepository.GetAllShirts());
         }
 
         [HttpGet("{id}")]
@@ -29,7 +23,7 @@ namespace WebAppiDemo.Controllers
                 return BadRequest("Invalid shirt ID.");
             }
 
-            var shirt = shirts.FirstOrDefault(s => s.ShirtId == id);
+            var shirt = ShirtRepository.GetShirtById(id);
             if (shirt == null)
             {
                 return NotFound();
@@ -40,10 +34,7 @@ namespace WebAppiDemo.Controllers
         [HttpPost]
         public IActionResult CreateShirt([FromBody] CreateShirtDto createShirtDto)
         {
-            var newShirtId = shirts.Max(s => s.ShirtId) + 1;
-            var newShirt = createShirtDto.ToEntity(newShirtId);
-
-            shirts.Add(newShirt);
+            var newShirt = ShirtRepository.AddShirt(createShirtDto.ToEntity());
 
             // In a real application, you would save the shirt to a database
             return Created($"/shirts/{newShirt.ShirtId}", newShirt);
@@ -52,7 +43,7 @@ namespace WebAppiDemo.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateShirt(int id, [FromBody] UpdateShirtDto updateShirtDto)
         {
-            var existingShirt = shirts.FirstOrDefault(s => s.ShirtId == id);
+            var existingShirt = ShirtRepository.GetShirtById(id);
             if (existingShirt == null)
             {
                 return NotFound();
@@ -61,13 +52,15 @@ namespace WebAppiDemo.Controllers
             updateShirtDto.ApplyToEntity(existingShirt);
 
             // In a real application, you would update the shirt in a database
+            ShirtRepository.SaveShirt(existingShirt);
+
             return NoContent();
         }
 
         [HttpPatch("{id}")]
         public IActionResult PartialUpdateShirt(int id, [FromBody] PartialUpdateShirtDto partialUpdateShirtDto)
         {
-            var existingShirt = shirts.FirstOrDefault(s => s.ShirtId == id);
+            var existingShirt = ShirtRepository.GetShirtById(id);
             if (existingShirt == null)
             {
                 return NotFound();
@@ -88,22 +81,24 @@ namespace WebAppiDemo.Controllers
 
             partialUpdateShirtDto.ApplyToEntity(existingShirt);
 
-            // In a real application, you would partially update the shirt in a database
+            // In a real application, you would update the shirt in a database
+            ShirtRepository.SaveShirt(existingShirt);
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteShirt(int id)
         {
-            var existingShirt = shirts.FirstOrDefault(s => s.ShirtId == id);
+            var existingShirt = ShirtRepository.GetShirtById(id);
             if (existingShirt == null)
             {
                 return NotFound();
             }
 
-            shirts.Remove(existingShirt);
-
             // In a real application, you would delete the shirt from a database
+            ShirtRepository.DeleteShirt(id);
+
             return NoContent();
         }
     }
