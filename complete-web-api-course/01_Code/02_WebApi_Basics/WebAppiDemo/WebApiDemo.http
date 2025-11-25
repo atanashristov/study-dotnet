@@ -20,9 +20,11 @@ POST {{WebApiDemo_BaseUrl}}/api/shirts
 Content-Type: application/json
 
 {
-  "size": 43,
+  "size": 5,
   "color": "Blue",
-  "price": 19.99
+  "price": 19.99,
+  "brand": "Nike",
+  "gender": "female"
 }
 
 # ### 4.1. Create New Shirt
