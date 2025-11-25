@@ -292,3 +292,260 @@ Transfer-Encoding: chunked
   "traceId": "00-a65a9d84feca6e409586b9d3588265b6-abc29d042f2ea54a-00"
 }
 ```
+
+## Lesson 02.12-Remarks: Validation vs DB
+
+Keep using validation attributes for:
+
+- Required fields
+- String length, range validation
+- Format validation (email, phone)
+- Business rules based on the object's own properties (like your size/gender rule)
+
+For DB validation, use these approaches instead of ValidationAttribute.
+
+### Action Filter (for cross-cutting concerns)
+
+```cs
+public class ValidateShirtExistsAttribute : ActionFilterAttribute
+{
+    public override async Task OnActionExecutionAsync(
+        ActionExecutingContext context,
+        ActionExecutionDelegate next)
+    {
+        var id = context.ActionArguments["id"] as int?;
+        var dbContext = context.HttpContext.RequestServices
+            .GetRequiredService<AppDbContext>();
+
+        if (!await dbContext.Shirts.AnyAsync(s => s.Id == id))
+        {
+            context.Result = new NotFoundResult();
+            return;
+        }
+        await next();
+    }
+}
+```
+
+### In the Controller Action (most common)
+
+```cs
+[HttpPut("{id}")]
+public async Task<IActionResult> UpdateShirt(int id, [FromBody] Shirt shirt)
+{
+    var existingShirt = await _dbContext.Shirts.FindAsync(id);
+    if (existingShirt == null)
+        return NotFound();
+
+    // Update logic...
+}
+```
+
+, and not found returns:
+
+```json
+HTTP/1.1 404 Not Found
+Connection: close
+Content-Type: application/problem+json; charset=utf-8
+Date: Tue, 25 Nov 2025 15:32:37 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+  "title": "Not Found",
+  "status": 404,
+  "traceId": "00-ab4f4aa3914b87d0113cbc8a439f6dae-91c7703e4abe12eb-00"
+}
+```
+
+### Service/Business Layer (best for complex logic)
+
+```cs
+public class ShirtService
+{
+    public async Task<Result> CreateShirtAsync(Shirt shirt)
+    {
+        if (await _dbContext.Shirts.AnyAsync(s => s.Sku == shirt.Sku))
+            return Result.Fail("SKU already exists");
+
+        // Create logic...
+    }
+}
+```
+
+## Lesson 02.12-Remarks: How client should handle the ApI errors
+
+Based on the standard .NET Web API responses shown in your notes, here are the proper ways to check for errors:
+
+### HTTP Status Codes (Primary Method)
+
+The most reliable way is to check the HTTP status code:
+
+```js
+// In your HTTP client or JavaScript
+if (response.status >= 400) {
+    // Error occurred
+    console.log('Error:', response.status);
+}
+
+// More specific checks
+if (response.status === 400) {
+    // Bad Request - validation errors
+} else if (response.status === 404) {
+    // Not Found
+} else if (response.status >= 500) {
+    // Server error
+}
+```
+
+### Response Body Structure
+
+For validation errors (400 Bad Request), the response follows the Problem Details format:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "Brand": ["The Brand field is required."],
+    "Gender": ["The Gender field is required."]
+  },
+  "traceId": "00-31b9a1519cf7117415e717631c7ca7f9-71a4c09ae46e9711-00"
+}
+```
+
+For Not Found errors (404), it's simpler:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+  "title": "Not Found",
+  "status": 404,
+  "traceId": "00-ab4f4aa3914b87d0113cbc8a439f6dae-91c7703e4abe12eb-00"
+}
+```
+
+### Practical Error Handling Examples
+
+In HTTP Files (VS Code REST Client):
+
+```js
+### Test with error handling
+POST {{WebApiDemo_BaseUrl}}/api/shirts
+Content-Type: application/json
+
+{
+  "color": "Blue",
+  "price": 19.99
+}
+
+> {%
+client.test("Request executed successfully", function() {
+    client.assert(response.status !== 500, "Server error occurred");
+    if (response.status === 400) {
+        client.log("Validation errors: " + JSON.stringify(response.body.errors));
+    }
+});
+%}
+```
+
+In JavaScript/TypeScript:
+
+```js
+async function createShirt(shirtData) {
+    try {
+        const response = await fetch('/api/shirts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(shirtData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+
+            if (response.status === 400) {
+                // Handle validation errors
+                console.log('Validation errors:', errorData.errors);
+                return { success: false, validationErrors: errorData.errors };
+            } else if (response.status === 404) {
+                console.log('Resource not found');
+                return { success: false, error: 'Not found' };
+            } else {
+                console.log('Unexpected error:', errorData);
+                return { success: false, error: errorData.title };
+            }
+        }
+
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error) {
+        console.error('Network error:', error);
+        return { success: false, error: 'Network error' };
+    }
+}
+```
+
+In C# (HttpClient):
+
+```cs
+public async Task<ApiResult<Shirt>> CreateShirtAsync(Shirt shirt)
+{
+    var response = await _httpClient.PostAsJsonAsync("/api/shirts", shirt);
+
+    if (response.IsSuccessStatusCode)
+    {
+        var createdShirt = await response.Content.ReadFromJsonAsync<Shirt>();
+        return ApiResult<Shirt>.Success(createdShirt);
+    }
+    else if (response.StatusCode == HttpStatusCode.BadRequest)
+    {
+        var problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        return ApiResult<Shirt>.ValidationError(problemDetails.Errors);
+    }
+    else if (response.StatusCode == HttpStatusCode.NotFound)
+    {
+        return ApiResult<Shirt>.NotFound();
+    }
+    else
+    {
+        return ApiResult<Shirt>.Error($"Unexpected error: {response.StatusCode}");
+    }
+}
+```
+
+### Key Points for Error Detection
+
+Key Points for Error Detection:
+
+1. Always check HTTP status code first - it's the most reliable indicator
+1. Status codes 400-499 indicate client errors (bad request, validation, not found, etc.)
+1. Status codes 500-599 indicate server errors
+Problem Details format is the standard for .NET error responses
+1. Validation errors will have an errors object with field-specific messages
+1. The `traceId` can be useful for debugging server-side issues
+
+The HTTP status code is your primary indicator of success vs. error, and the response body provides the details about what went wrong.
+
+## Lesson 02.13: Return types
+
+Typically we return `IActionResult` from controller methods:
+
+```cs
+[HttpGet("{id}")]
+public IActionResult GetShirtById(int id)
+{
+ if (id <= 0)
+ {
+  return BadRequest("Invalid shirt ID.");
+ }
+
+ var shirt = shirts.FirstOrDefault(s => s.ShirtId == id);
+ if (shirt == null)
+ {
+  return NotFound();
+ }
+ return Ok(shirt);
+}
+```

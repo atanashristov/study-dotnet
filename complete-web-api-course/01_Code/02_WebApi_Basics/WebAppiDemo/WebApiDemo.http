@@ -10,7 +10,7 @@ GET {{WebApiDemo_BaseUrl}}/api/shirts
 Accept: application/json
 
 ### 3. Get Shirt by Id
-@firstItemId = {{getShirts.response.body.$[0].id}}
+@firstItemId = {{getShirts.response.body.$.[0].shirtId}}
 GET {{WebApiDemo_BaseUrl}}/api/shirts/{{firstItemId}}
 Accept: application/json
 
@@ -20,7 +20,7 @@ POST {{WebApiDemo_BaseUrl}}/api/shirts
 Content-Type: application/json
 
 {
-  "size": 5,
+  "size": 6,
   "color": "Blue",
   "price": 19.99,
   "brand": "Nike",
@@ -35,15 +35,17 @@ Content-Type: application/json
 # size=43&color=Blue&price=19.99
 
 ### 5. Update Shirt
-@newItemId = {{createShirt.response.body.id}}
+@newItemId = {{createShirt.response.body.shirtId}}
 PUT {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
 Content-Type: application/json
 
 {
-  "id": "{{newItemId}}",
-  "size": "XL",
-  "color": "Red",
-  "price": 21.99
+  "shirtId": {{newItemId}},
+  "size": 6,
+  "color": "Blue",
+  "price": 25.55,
+  "brand": "Nike",
+  "gender": "female"
 }
 
 ### 6. Patch Shirt
@@ -51,6 +53,7 @@ PATCH {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
 Content-Type: application/json
 
 {
+  "gender": "male",
   "price": 18.99
 }
 
