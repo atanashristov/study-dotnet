@@ -55,7 +55,7 @@ Content-Type: application/json
 {
   "size": 8,
   "gender": "male",
-  "price": 18.99
+  "price": 99.99
 }
 
 ### 7. Delete Shirt

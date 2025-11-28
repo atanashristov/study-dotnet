@@ -549,3 +549,107 @@ public IActionResult GetShirtById(int id)
  return Ok(shirt);
 }
 ```
+
+## Lesson 02.15: Model Validation with Action Filter
+
+Currently we return `NotFound` from the controller method when the requested by id entity:
+
+```cs
+[HttpGet("{id}")]
+public IActionResult GetShirtById(int id)
+{
+ if (id <= 0)
+ {
+  return BadRequest("Invalid shirt ID.");
+ }
+
+ var shirt = ShirtRepository.GetShirtById(id);
+ if (shirt == null)
+ {
+  return NotFound();
+ }
+ return Ok(shirt);
+}
+```
+
+But this violates the _single responsibility_ principle.
+
+The _validation attributes_ only validate the input and do not return http response codes.
+
+For this more complex validation that needs to return http status code we have [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0).
+
+_Filters_ in ASP.NET Core allow code to run before or after specific stages in the request processing pipeline. The _filter pipeline_ is an _extension of the middleware_.
+
+Built-in filters handle tasks such as:
+
+- Authorization, preventing access to resources a user isn't authorized for.
+- Response caching, short-circuiting the request pipeline to return a cached response.
+
+Custom filters can be created to handle cross-cutting concerns. Examples of cross-cutting concerns include error handling, caching, configuration, authorization, and logging ([source](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)).
+
+![action filters diagram](../03_Resources/Diagrams/02_05-action_filter_pipeline.png)
+
+How filters interact wih the filer pipeline ([source](https://whosnailaspnetcoredocs.readthedocs.io/ko/latest/mvc/controllers/filters.html)):
+
+![Filter Pipeline](../03_Resources/Diagrams/02_15-filter-pipeline.png)
+
+We add `Filters/Shirt_ValidateShirtIdFilterAttribute.cs` class that inherits from [ActionFilterAttribute](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.filters.actionfilterattribute?view=aspnetcore-10.0).
+
+We have the following methods that we can override:
+
+- `OnActionExecuted`: Called after the action executes, before the action result.
+- `OnActionExecuting`: Called before the action executes, after model binding is complete. This is what we override for validation
+
+### ValidationAttribute vs ValidationProblemDetails
+
+`ValidationProblemDetails` and `ValidationAttribute` serve different purposes in different layers:
+
+**`ValidationResult`** (ValidationAttribute layer)
+
+- Used in **validation attributes** like `[Required]`, `[Range]`, custom validators
+- Simple result object with error message
+- ASP.NET automatically collects these into ModelState
+- Framework converts them to ProblemDetails later
+
+**`ValidationProblemDetails`** (Controller/HTTP layer, Filters)
+
+- HTTP response format (RFC 7807)
+- Contains full error details: type, title, status, traceId, errors
+- Used when **returning responses** from controllers/filters
+- Cannot be used in validation attributes
+
+**The flow:**
+
+```js
+1. ValidationAttribute.IsValid()
+   → returns ValidationResult
+
+2. ASP.NET collects results into ModelState
+
+3. Controller/Filter
+   → Creates ValidationProblemDetails from ModelState
+   → Returns HTTP response
+```
+
+**Why you can't mix them:**
+
+```csharp
+// ❌ This won't work - wrong return type
+protected override ValidationProblemDetails IsValid(...)
+{
+    return new ValidationProblemDetails(...); // Compile error
+}
+
+// ✅ Correct - ValidationAttribute must return ValidationResult
+protected override ValidationResult? IsValid(...)
+{
+    return new ValidationResult("Error message");
+}
+```
+
+**Summary:**
+
+- **ValidationResult** = validation logic (model layer)
+- **ValidationProblemDetails** = HTTP response (presentation layer)
+
+They're separate concerns in the validation pipeline. Your current code is correct - use `ValidationResult` in attributes, and `ValidationProblemDetails` in controllers/filters when returning responses.
