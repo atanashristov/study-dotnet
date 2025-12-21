@@ -29,6 +29,27 @@ namespace WebAppiDemo.Models.Repositories
             return shirts.FirstOrDefault(s => s.ShirtId == id);
         }
 
+        public static Shirt? GetShirtByProperties(
+            string brand,
+            string color,
+            string gender,
+            int? size)
+        {
+            return shirts.FirstOrDefault(s =>
+                !string.IsNullOrWhiteSpace(brand) &&
+                !string.IsNullOrWhiteSpace(s.Brand) &&
+                s.Brand.Equals(brand, StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(color) &&
+                !string.IsNullOrWhiteSpace(s.Color) &&
+                s.Color.Equals(color, StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(gender) &&
+                !string.IsNullOrWhiteSpace(s.Gender) &&
+                s.Gender.Equals(gender, StringComparison.OrdinalIgnoreCase) &&
+                size.HasValue &&
+                s.Size.HasValue &&
+                s.Size == size);
+        }
+
         public static Shirt AddShirt(Shirt shirt)
         {
             if (shirt.ShirtId >= 0 && shirts.Any(s => s.ShirtId == shirt.ShirtId))
@@ -45,7 +66,7 @@ namespace WebAppiDemo.Models.Repositories
             return shirt;
         }
 
-        public static void SaveShirt(Shirt updatedShirt)
+        public static void UpdateShirt(Shirt updatedShirt)
         {
             if (updatedShirt.ShirtId <= 0)
             {

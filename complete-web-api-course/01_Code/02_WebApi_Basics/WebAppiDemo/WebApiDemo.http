@@ -20,11 +20,11 @@ POST {{WebApiDemo_BaseUrl}}/api/shirts
 Content-Type: application/json
 
 {
-  "size": 6,
-  "color": "Blue",
-  "price": 19.99,
   "brand": "Nike",
-  "gender": "female"
+  "color": "Red",
+  "size": 8,
+  "gender": "Male",
+  "price": 29.99
 }
 
 # ### 4.1. Create New Shirt
@@ -40,12 +40,11 @@ PUT {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
 Content-Type: application/json
 
 {
-  "shirtId": {{newItemId}},
-  "size": 6,
-  "color": "Blue",
-  "price": 25.55,
   "brand": "Nike",
-  "gender": "female"
+  "color": "Red",
+  "size": 8,
+  "gender": "Male",
+  "price": 25.99
 }
 
 ### 6. Patch Shirt
@@ -53,8 +52,7 @@ PATCH {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
 Content-Type: application/json
 
 {
-  "size": 8,
-  "gender": "male",
+  "gender": "Male",
   "price": 99.99
 }
 

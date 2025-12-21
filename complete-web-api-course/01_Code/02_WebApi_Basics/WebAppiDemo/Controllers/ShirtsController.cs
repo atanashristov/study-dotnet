@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using WebAppiDemo.Filters;
 using WebAppiDemo.Models;
 using WebAppiDemo.Models.Repositories;
-using WebAppiDemo.Models.Validations;
 
 namespace WebAppiDemo.Controllers
 {
@@ -24,74 +23,57 @@ namespace WebAppiDemo.Controllers
         }
 
         [HttpPost]
+        [Shirt_ValidateCreateShirtFilter]
         public IActionResult CreateShirt([FromBody] CreateShirtDto createShirtDto)
         {
             var newShirt = ShirtRepository.AddShirt(createShirtDto.ToEntity());
 
             // In a real application, you would save the shirt to a database
-            return Created($"/shirts/{newShirt.ShirtId}", newShirt);
+            return CreatedAtAction(nameof(GetShirtById),
+                new { id = newShirt.ShirtId },
+                newShirt);
+            // return Created($"/shirts/{newShirt.ShirtId}", newShirt);
         }
 
         [HttpPut("{id}")]
+        [Shirt_ValidateShirtIdFilter]
+        [Shirt_ValidateUpdateShirtFilter]
+        [Shirt_HandleUpdateExceptionsFilter]
         public IActionResult UpdateShirt(int id, [FromBody] UpdateShirtDto updateShirtDto)
         {
             var existingShirt = ShirtRepository.GetShirtById(id);
-            if (existingShirt == null)
-            {
-                return NotFound();
-            }
 
-            updateShirtDto.ApplyToEntity(existingShirt);
+            updateShirtDto.ApplyToEntity(existingShirt!);
 
-            // In a real application, you would update the shirt in a database
-            ShirtRepository.SaveShirt(existingShirt);
+            ShirtRepository.UpdateShirt(existingShirt!);
 
             return NoContent();
         }
 
         [HttpPatch("{id}")]
+        [Shirt_ValidateShirtIdFilter]
+        [Shirt_ValidatePatchShirtFilter]
+        [Shirt_HandleUpdateExceptionsFilter]
         public IActionResult PartialUpdateShirt(int id, [FromBody] PartialUpdateShirtDto partialUpdateShirtDto)
         {
             var existingShirt = ShirtRepository.GetShirtById(id);
-            if (existingShirt == null)
-            {
-                return NotFound();
-            }
 
-            // Validate size/gender combination (check both directions)
-            if (partialUpdateShirtDto.Size.HasValue || partialUpdateShirtDto.Gender != null)
-            {
-                var gender = partialUpdateShirtDto.Gender ?? existingShirt.Gender;
-                var size = partialUpdateShirtDto.Size ?? existingShirt.Size;
+            partialUpdateShirtDto.ApplyToEntity(existingShirt!);
 
-                if (!ShirtSizeValidator.IsValidSize(gender, size, out var errorMessage))
-                {
-                    ModelState.AddModelError("Size", errorMessage ?? "Invalid size for the selected gender.");
-                    return ValidationProblem(ModelState);
-                }
-            }
-
-            partialUpdateShirtDto.ApplyToEntity(existingShirt);
-
-            // In a real application, you would update the shirt in a database
-            ShirtRepository.SaveShirt(existingShirt);
+            ShirtRepository.UpdateShirt(existingShirt!);
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
+        [Shirt_ValidateShirtIdFilter]
         public IActionResult DeleteShirt(int id)
         {
             var existingShirt = ShirtRepository.GetShirtById(id);
-            if (existingShirt == null)
-            {
-                return NotFound();
-            }
 
-            // In a real application, you would delete the shirt from a database
             ShirtRepository.DeleteShirt(id);
 
-            return NoContent();
+            return Ok(existingShirt);
         }
     }
 }
