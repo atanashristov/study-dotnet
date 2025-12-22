@@ -1,6 +1,7 @@
 -- Initialize the WebApiDemo database
 -- This script runs automatically when the PostgreSQL container starts for the first time
-\ c WebApiDemo;
+-- Database context is already set via POSTGRES_DB environment variable
+
 -- Create any initial tables or data here if needed
 -- For now, this is just a placeholder file
 -- Example: Create a simple health check table

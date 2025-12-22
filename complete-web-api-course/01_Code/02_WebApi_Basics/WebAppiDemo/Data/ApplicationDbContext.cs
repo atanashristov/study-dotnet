@@ -5,6 +5,13 @@ namespace WebAppiDemo.Data
 {
     public class ApplicationDbContext : DbContext
     {
+        public ApplicationDbContext(DbContextOptions options) : base(options)
+        {
+            // the constructor is needed for connecting to the database
+            // it maps what is the DB to connect to via the options
+            // the options are configured in Program.cs
+        }
+
         public DbSet<Shirt> Shirts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -21,11 +28,12 @@ namespace WebAppiDemo.Data
 
             // data seeding
 
-            modelBuilder.Entity<Shirt>().HasData(
-                new Shirt { ShirtId = 1, Brand = "Nike", Color = "Red", Size = 10, Gender = "Male", Price = 29.99 },
-                new Shirt { ShirtId = 2, Brand = "Adidas", Color = "Blue", Size = 12, Gender = "Male", Price = 34.99 },
-                new Shirt { ShirtId = 3, Brand = "Puma", Color = "Green", Size = 8, Gender = "Female", Price = 24.99 }
-            );
+            // Instead of this we seed data in Program.cs based on development env ns Production env, etc.
+            // modelBuilder.Entity<Shirt>().HasData(
+            //     new Shirt { ShirtId = 1, Brand = "Nike", Color = "Red", Size = 10, Gender = "Male", Price = 29.99 },
+            //     new Shirt { ShirtId = 2, Brand = "Adidas", Color = "Blue", Size = 12, Gender = "Male", Price = 34.99 },
+            //     new Shirt { ShirtId = 3, Brand = "Puma", Color = "Green", Size = 8, Gender = "Female", Price = 24.99 }
+            // );
         }
     }
 }
