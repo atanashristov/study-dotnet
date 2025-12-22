@@ -1,0 +1,38 @@
+services:
+  webapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=WebApiDemo;Username=postgres;Password=postgres123
+    depends_on:
+      - postgres
+    networks:
+      - webapi-network
+
+  postgres:
+    image: postgres:17
+    container_name: postgres-webapi
+    environment:
+      POSTGRES_DB: WebApiDemo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - webapi-network
+
+volumes:
+  postgres_data:
+
+networks:
+  webapi-network:
+    driver: bridge
