@@ -1,12 +1,19 @@
 using Microsoft.AspNetCore.Mvc.Filters;
+using WebAppiDemo.Data;
 using WebAppiDemo.Models;
-using WebAppiDemo.Models.Repositories;
 using WebAppiDemo.Utilities;
 
 namespace WebAppiDemo.Filters
 {
     public class Shirt_ValidateCreateShirtFilterAttribute : ActionFilterAttribute
     {
+        private readonly ApplicationDbContext db;
+
+        public Shirt_ValidateCreateShirtFilterAttribute(ApplicationDbContext db)
+        {
+            this.db = db;
+        }
+
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             base.OnActionExecuting(context);
@@ -23,11 +30,19 @@ namespace WebAppiDemo.Filters
 
             var createShirtDto = (CreateShirtDto)createShirtDtoObj;
 
-            var existingShirt = ShirtRepository.GetShirtByProperties(
-                createShirtDto.Brand,
-                createShirtDto.Color,
-                createShirtDto.Gender,
-                createShirtDto.Size);
+            var existingShirt = db.Shirts.FirstOrDefault(s =>
+                !string.IsNullOrWhiteSpace(createShirtDto.Brand) &&
+                !string.IsNullOrWhiteSpace(s.Brand) &&
+                s.Brand.ToLower() == createShirtDto.Brand.ToLower() &&
+                !string.IsNullOrWhiteSpace(createShirtDto.Color) &&
+                !string.IsNullOrWhiteSpace(s.Color) &&
+                s.Color.ToLower() == createShirtDto.Color.ToLower() &&
+                !string.IsNullOrWhiteSpace(createShirtDto.Gender) &&
+                !string.IsNullOrWhiteSpace(s.Gender) &&
+                s.Gender.ToLower() == createShirtDto.Gender.ToLower() &&
+                createShirtDto.Size.HasValue &&
+                s.Size.HasValue &&
+                s.Size == createShirtDto.Size);
 
             if (existingShirt != null)
             {

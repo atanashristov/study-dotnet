@@ -38,10 +38,12 @@ namespace WebAppiDemo.Controllers
         }
 
         [HttpPost]
-        [Shirt_ValidateCreateShirtFilter]
+        [TypeFilter(typeof(Shirt_ValidateCreateShirtFilterAttribute))]
         public IActionResult CreateShirt([FromBody] CreateShirtDto createShirtDto)
         {
-            var newShirt = ShirtRepository.AddShirt(createShirtDto.ToEntity());
+            var newShirt = createShirtDto.ToEntity();
+            db.Shirts.Add(newShirt);
+            db.SaveChanges();
 
             // In a real application, you would save the shirt to a database
             return CreatedAtAction(nameof(GetShirtById),
