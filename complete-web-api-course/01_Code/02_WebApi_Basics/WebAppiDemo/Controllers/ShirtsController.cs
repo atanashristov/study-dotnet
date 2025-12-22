@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebAppiDemo.Data;
 using WebAppiDemo.Filters;
 using WebAppiDemo.Models;
 using WebAppiDemo.Models.Repositories;
@@ -9,17 +10,31 @@ namespace WebAppiDemo.Controllers
     [Route("api/[controller]")]
     public class ShirtsController : ControllerBase
     {
+        private readonly ApplicationDbContext db;
+
+        public ShirtsController(ApplicationDbContext db)
+        {
+            this.db = db;
+        }
+
         [HttpGet]
         public IActionResult GetShirts()
         {
-            return Ok(ShirtRepository.GetAllShirts());
+            return Ok(db.Shirts.ToList());
         }
 
         [HttpGet("{id}")]
-        [Shirt_ValidateShirtIdFilter]
+        // Now that the filter accepts parameter in constructor we cannot use this
+        // [Shirt_ValidateShirtIdFilter]
+        // We do TypeFilter instead
+        [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         public IActionResult GetShirtById(int id)
         {
-            return Ok(ShirtRepository.GetShirtById(id));
+            // var shirt = db.Shirts.Find(id);
+            // We don't want to query the database again, so we get the shirt from HttpContext.Items
+            var shirt = HttpContext.Items["Shirt"] as Shirt;
+
+            return Ok(shirt);
         }
 
         [HttpPost]
@@ -36,12 +51,13 @@ namespace WebAppiDemo.Controllers
         }
 
         [HttpPut("{id}")]
-        [Shirt_ValidateShirtIdFilter]
+        [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         [Shirt_ValidateUpdateShirtFilter]
         [Shirt_HandleUpdateExceptionsFilter]
         public IActionResult UpdateShirt(int id, [FromBody] UpdateShirtDto updateShirtDto)
         {
-            var existingShirt = ShirtRepository.GetShirtById(id);
+            // var existingShirt = ShirtRepository.GetShirtById(id);
+            var existingShirt = HttpContext.Items["Shirt"] as Shirt;
 
             updateShirtDto.ApplyToEntity(existingShirt!);
 
@@ -51,12 +67,13 @@ namespace WebAppiDemo.Controllers
         }
 
         [HttpPatch("{id}")]
-        [Shirt_ValidateShirtIdFilter]
+        [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         [Shirt_ValidatePatchShirtFilter]
         [Shirt_HandleUpdateExceptionsFilter]
         public IActionResult PartialUpdateShirt(int id, [FromBody] PartialUpdateShirtDto partialUpdateShirtDto)
         {
-            var existingShirt = ShirtRepository.GetShirtById(id);
+            // var existingShirt = ShirtRepository.GetShirtById(id);
+            var existingShirt = HttpContext.Items["Shirt"] as Shirt;
 
             partialUpdateShirtDto.ApplyToEntity(existingShirt!);
 
@@ -66,10 +83,11 @@ namespace WebAppiDemo.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Shirt_ValidateShirtIdFilter]
+        [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         public IActionResult DeleteShirt(int id)
         {
-            var existingShirt = ShirtRepository.GetShirtById(id);
+            // var existingShirt = ShirtRepository.GetShirtById(id);
+            var existingShirt = HttpContext.Items["Shirt"] as Shirt;
 
             ShirtRepository.DeleteShirt(id);
 

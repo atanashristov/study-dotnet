@@ -1,4 +1,5 @@
 @WebApiDemo_BaseUrl = http://localhost:5250
+# @WebApiDemo_BaseUrl = http://localhost:8000
 
 ### 1. Get Hello World
 GET {{WebApiDemo_BaseUrl}}/

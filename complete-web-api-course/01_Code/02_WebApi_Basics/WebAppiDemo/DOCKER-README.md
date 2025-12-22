@@ -469,6 +469,71 @@ WebAppiDemo/
 └── DOCKER-README.md        # This file
 ```
 
+### Database Setup Strategy
+
+This project uses a **hybrid approach** for database initialization:
+
+#### 🔧 **Entity Framework Core (EF Core)**
+- **Purpose**: Manages application data tables
+- **Tables**: `Shirts` table (and other business entities)
+- **Method**: Auto-creation via `EnsureCreated()` in Program.cs
+- **Data**: Automatic seeding of business data on first startup
+
+#### 🩺 **init.sql Script**
+- **Purpose**: Creates utility and monitoring tables
+- **Tables**: `health_check`, `database_info`
+- **Method**: PostgreSQL initialization script (runs once on first container startup)
+- **Data**: System metadata and health monitoring setup
+
+#### 💡 **Why This Separation?**
+
+**✅ Benefits:**
+- **No conflicts**: EF Core and init.sql manage different tables
+- **Health monitoring**: Database connectivity and status tracking
+- **Troubleshooting**: System info helps with debugging
+- **Separation of concerns**: App data vs. operational data
+
+**🚫 Avoiding Conflicts:**
+- EF Core manages business entities (`Shirts`, future models)
+- init.sql manages system utilities (`health_check`, `database_info`)
+- No overlap = no conflicts between auto-migration and SQL scripts
+
+#### 📊 **Testing Database Health**
+
+**Check health monitoring:**
+```bash
+# View health check records
+docker exec -it postgres-webapi psql -U postgres -d WebApiDemo -c "SELECT * FROM health_check;"
+
+# View database info
+docker exec -it postgres-webapi psql -U postgres -d WebApiDemo -c "SELECT * FROM database_info;"
+
+# Add custom health check
+docker exec -it postgres-webapi psql -U postgres -d WebApiDemo -c "SELECT update_health_check('api_test', 'success', 'Manual test');"
+```
+
+**Check EF Core tables:**
+```bash
+# View business data (managed by EF Core)
+docker exec -it postgres-webapi psql -U postgres -d WebApiDemo -c "SELECT * FROM \"Shirts\";"
+
+# List all tables
+docker exec -it postgres-webapi psql -U postgres -d WebApiDemo -c "\dt"
+```
+
+#### 🔄 **Startup Sequence**
+
+1. **PostgreSQL container starts** → Runs `init.sql` (creates utility tables)
+2. **Web API container starts** → EF Core runs `EnsureCreated()` (creates app tables)
+3. **Data seeding** → Program.cs seeds initial shirt data
+4. **Health check** → `health_check` table tracks initialization success
+
+**Important**: If you need a fresh start, use:
+```bash
+docker-compose down && docker volume rm webappidemo_postgres_data
+```
+This recreates both init.sql tables and EF Core tables with fresh data.
+
 ## Configuration Details
 
 ### Environment Variables

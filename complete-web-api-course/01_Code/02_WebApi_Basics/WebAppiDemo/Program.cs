@@ -65,18 +65,11 @@ if (app.Environment.IsDevelopment())
     {
         try
         {
-            Console.WriteLine($"🔄 Attempting database setup (attempt {retryCount + 1}/{maxRetries})...");
+            Console.WriteLine($"🔄 Attempting database migration (attempt {retryCount + 1}/{maxRetries})...");
 
-            // Use EnsureCreated for development instead of migrations to avoid conflicts
-            bool wasCreated = await context.Database.EnsureCreatedAsync();
-            if (wasCreated)
-            {
-                Console.WriteLine("✅ Database and tables created successfully!");
-            }
-            else
-            {
-                Console.WriteLine("ℹ️ Database already exists, checking if tables exist...");
-            }
+            // Apply any pending migrations
+            await context.Database.MigrateAsync();
+            Console.WriteLine("✅ Database migration completed successfully!");
 
             // Seed development data only if database is empty
             bool hasData = false;
@@ -84,9 +77,9 @@ if (app.Environment.IsDevelopment())
             {
                 hasData = await context.Shirts.AnyAsync();
             }
-            catch (Exception ex) when (ex.Message.Contains("does not exist"))
+            catch (Exception ex) when (ex.Message.Contains("does not exist") || ex.Message.Contains("pending changes"))
             {
-                Console.WriteLine("⚠️ Shirts table doesn't exist - this should not happen after EnsureCreated. Retrying...");
+                Console.WriteLine("⚠️ Migration issue detected - this may be normal for the first startup. Retrying...");
                 throw; // This will trigger a retry
             }
 

@@ -1,11 +1,19 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using WebAppiDemo.Models.Repositories;
+using WebAppiDemo.Data;
 using WebAppiDemo.Utilities;
 
 namespace WebAppiDemo.Filters
 {
     public class Shirt_ValidateShirtIdFilterAttribute : ActionFilterAttribute
     {
+        private readonly ApplicationDbContext db;
+
+        public Shirt_ValidateShirtIdFilterAttribute(ApplicationDbContext db)
+        {
+            this.db = db;
+        }
+
+
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             base.OnActionExecuting(context);
@@ -20,13 +28,18 @@ namespace WebAppiDemo.Filters
                 return;
             }
 
-            if (!ShirtRepository.ShirtExists(shirtId.Value))
+            var shirt = db.Shirts.Find(shirtId.Value);
+            if (shirt == null)
             {
                 ValidationProblemDetailsHelper.SetValidationErrorResult(
                     context,
                     "id",
                     "Shirt does not exist.",
                     StatusCodes.Status404NotFound);
+            }
+            else
+            {
+                context.HttpContext.Items["Shirt"] = shirt;
             }
         }
     }
