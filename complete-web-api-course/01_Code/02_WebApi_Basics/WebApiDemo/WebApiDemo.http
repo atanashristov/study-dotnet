@@ -55,7 +55,8 @@ PATCH {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
 Content-Type: application/json
 
 {
-  "gender": "Male",
+  "color": "Red",
+  "size": 9,
   "price": 99.99
 }
 

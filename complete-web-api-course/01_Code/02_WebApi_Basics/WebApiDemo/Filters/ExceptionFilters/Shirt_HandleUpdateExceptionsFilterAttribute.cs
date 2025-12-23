@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using WebApiDemo.Data;
-using WebApiDemo.Models.Repositories;
 using WebApiDemo.Utilities;
 
 class Shirt_HandleUpdateExceptionsFilterAttribute : ExceptionFilterAttribute

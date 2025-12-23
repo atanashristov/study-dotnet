@@ -6,6 +6,12 @@ using WebApiDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddConsole()
+    .AddSimpleConsole(options =>
+    {
+        options.IncludeScopes = true; // This helps include TraceId in logs
+    });
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Another way would be specify:

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using WebApiDemo.Data;
 using WebApiDemo.Filters;
 using WebApiDemo.Models;
-using WebApiDemo.Models.Repositories;
 
 namespace WebApiDemo.Controllers
 {
@@ -58,10 +57,9 @@ namespace WebApiDemo.Controllers
         [TypeFilter(typeof(Shirt_HandleUpdateExceptionsFilterAttribute))]
         public IActionResult UpdateShirt(int id, [FromBody] UpdateShirtDto updateShirtDto)
         {
-            // var existingShirt = ShirtRepository.GetShirtById(id);
-            var existingShirt = HttpContext.Items["shirt"] as Shirt;
+            var shirtToUpdate = HttpContext.Items["shirt"] as Shirt;
 
-            updateShirtDto.ApplyToEntity(existingShirt!);
+            updateShirtDto.ApplyToEntity(shirtToUpdate!);
             db.SaveChanges();
 
             return NoContent();
@@ -69,16 +67,14 @@ namespace WebApiDemo.Controllers
 
         [HttpPatch("{id}")]
         [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
-        [Shirt_ValidatePatchShirtFilter]
+        [TypeFilter(typeof(Shirt_ValidatePatchShirtFilterAttribute))]
         [TypeFilter(typeof(Shirt_HandleUpdateExceptionsFilterAttribute))]
         public IActionResult PartialUpdateShirt(int id, [FromBody] PartialUpdateShirtDto partialUpdateShirtDto)
         {
-            // var existingShirt = ShirtRepository.GetShirtById(id);
-            var existingShirt = HttpContext.Items["shirt"] as Shirt;
+            var shirtToUpdate = HttpContext.Items["shirt"] as Shirt;
 
-            partialUpdateShirtDto.ApplyToEntity(existingShirt!);
-
-            ShirtRepository.UpdateShirt(existingShirt!);
+            partialUpdateShirtDto.ApplyToEntity(shirtToUpdate!);
+            db.SaveChanges();
 
             return NoContent();
         }
@@ -87,12 +83,12 @@ namespace WebApiDemo.Controllers
         [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         public IActionResult DeleteShirt(int id)
         {
-            // var existingShirt = ShirtRepository.GetShirtById(id);
-            var existingShirt = HttpContext.Items["shirt"] as Shirt;
+            var shirtToDelete = HttpContext.Items["shirt"] as Shirt;
 
-            ShirtRepository.DeleteShirt(id);
+            db.Shirts.Remove(shirtToDelete!);
+            db.SaveChanges();
 
-            return Ok(existingShirt);
+            return Ok(shirtToDelete);
         }
     }
 }
