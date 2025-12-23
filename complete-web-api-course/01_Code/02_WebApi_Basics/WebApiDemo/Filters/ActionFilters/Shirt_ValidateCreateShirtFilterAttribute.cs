@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc.Filters;
 using WebApiDemo.Data;
 using WebApiDemo.Models;
@@ -49,7 +50,8 @@ namespace WebApiDemo.Filters
                 ValidationProblemDetailsHelper.SetValidationErrorResult(
                     context,
                     "createShirtDto",
-                    "A shirt with the same brand, color, size, and gender already exists.");
+                    "A shirt with the same brand, color, size, and gender already exists.",
+                    (int)HttpStatusCode.Conflict);
                 return;
             }
 

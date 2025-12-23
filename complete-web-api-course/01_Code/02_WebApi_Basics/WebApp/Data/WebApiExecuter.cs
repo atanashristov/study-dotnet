@@ -2,7 +2,10 @@ namespace WebApp.Data
 {
     public interface IWebApiExecuter
     {
-        Task<T?> GetAsync<T>(string relativeUrl);
+        Task<T?> InvokeGetAsync<T>(string relativeUrl);
+        Task<TResponse?> InvokePostAsync<TRequest, TResponse>(
+            string relativeUrl,
+            TRequest request);
     }
 
     public class WebApiExecuter : IWebApiExecuter
@@ -15,10 +18,20 @@ namespace WebApp.Data
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task<T?> GetAsync<T>(string relativeUrl)
+        public async Task<TResponse?> InvokeGetAsync<TResponse>(string relativeUrl)
         {
             var httpClient = httpClientFactory.CreateClient(apiName);
-            return await httpClient.GetFromJsonAsync<T>(relativeUrl);
+            return await httpClient.GetFromJsonAsync<TResponse>(relativeUrl);
+        }
+
+        public async Task<TResponse?> InvokePostAsync<TRequest, TResponse>(
+            string relativeUrl,
+            TRequest request)
+        {
+            var httpClient = httpClientFactory.CreateClient(apiName);
+            var response = await httpClient.PostAsJsonAsync(relativeUrl, request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<TResponse>();
         }
     }
 }

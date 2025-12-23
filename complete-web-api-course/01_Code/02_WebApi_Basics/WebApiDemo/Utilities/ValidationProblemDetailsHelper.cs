@@ -31,12 +31,7 @@ namespace WebApiDemo.Utilities
     {
       context.ModelState.AddModelError(errorKey, errorMessage);
       var problemDetails = CreateValidationProblemDetails(context, statusCode);
-
-      context.Result = statusCode switch
-      {
-        StatusCodes.Status404NotFound => new NotFoundObjectResult(problemDetails),
-        _ => new BadRequestObjectResult(problemDetails)
-      };
+      context.Result = CreateObjectResult(problemDetails, statusCode);
     }
 
     public static void SetValidationErrorResult(
@@ -47,11 +42,24 @@ namespace WebApiDemo.Utilities
     {
       context.ModelState.AddModelError(errorKey, errorMessage);
       var problemDetails = CreateValidationProblemDetails(context, statusCode);
+      context.Result = CreateObjectResult(problemDetails, statusCode);
+    }
 
-      context.Result = statusCode switch
+    private static IActionResult CreateObjectResult(ValidationProblemDetails problemDetails, int statusCode)
+    {
+      return statusCode switch
       {
+        >= 200 and < 300 => new OkObjectResult(problemDetails),
+        >= 300 and < 400 => new ObjectResult(problemDetails) { StatusCode = statusCode },
+        StatusCodes.Status400BadRequest => new BadRequestObjectResult(problemDetails),
+        StatusCodes.Status401Unauthorized => new UnauthorizedObjectResult(problemDetails),
+        StatusCodes.Status403Forbidden => new ObjectResult(problemDetails) { StatusCode = StatusCodes.Status403Forbidden },
         StatusCodes.Status404NotFound => new NotFoundObjectResult(problemDetails),
-        _ => new BadRequestObjectResult(problemDetails)
+        StatusCodes.Status409Conflict => new ConflictObjectResult(problemDetails),
+        StatusCodes.Status422UnprocessableEntity => new UnprocessableEntityObjectResult(problemDetails),
+        >= 400 and < 500 => new ObjectResult(problemDetails) { StatusCode = statusCode },
+        >= 500 => new ObjectResult(problemDetails) { StatusCode = statusCode },
+        _ => new ObjectResult(problemDetails) { StatusCode = statusCode }
       };
     }
 
