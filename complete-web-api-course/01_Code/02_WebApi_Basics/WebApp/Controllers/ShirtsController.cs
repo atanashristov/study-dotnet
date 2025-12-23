@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using WebApp.Data;
+using WebApp.Models;
 using WebApp.Models.Repositories;
 
 namespace WebApp.Controllers
@@ -7,15 +9,19 @@ namespace WebApp.Controllers
     public class ShirtsController : Controller
     {
         private readonly ILogger<ShirtsController> _logger;
+        private readonly IWebApiExecuter _webApiExecuter;
 
-        public ShirtsController(ILogger<ShirtsController> logger)
+        public ShirtsController(
+            ILogger<ShirtsController> logger,
+            IWebApiExecuter webApiExecuter)
         {
             _logger = logger;
+            _webApiExecuter = webApiExecuter;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(ShirtRepository.GetAllShirts());
+            return View(await _webApiExecuter.GetAsync<List<Shirt>>("shirts"));
         }
 
         // [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
