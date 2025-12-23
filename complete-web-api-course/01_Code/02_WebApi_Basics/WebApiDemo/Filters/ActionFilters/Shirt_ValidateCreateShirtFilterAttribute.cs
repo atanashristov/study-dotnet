@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using WebAppiDemo.Data;
-using WebAppiDemo.Models;
-using WebAppiDemo.Utilities;
+using WebApiDemo.Data;
+using WebApiDemo.Models;
+using WebApiDemo.Utilities;
 
-namespace WebAppiDemo.Filters
+namespace WebApiDemo.Filters
 {
     public class Shirt_ValidateCreateShirtFilterAttribute : ActionFilterAttribute
     {

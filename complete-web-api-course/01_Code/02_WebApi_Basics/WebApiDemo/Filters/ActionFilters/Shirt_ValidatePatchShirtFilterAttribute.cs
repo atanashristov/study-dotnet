@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using WebAppiDemo.Models;
-using WebAppiDemo.Models.Repositories;
-using WebAppiDemo.Models.Validations;
-using WebAppiDemo.Utilities;
+using WebApiDemo.Models;
+using WebApiDemo.Models.Repositories;
+using WebApiDemo.Models.Validations;
+using WebApiDemo.Utilities;
 
-namespace WebAppiDemo.Filters
+namespace WebApiDemo.Filters
 {
   public class Shirt_ValidatePatchShirtFilterAttribute : ActionFilterAttribute
   {

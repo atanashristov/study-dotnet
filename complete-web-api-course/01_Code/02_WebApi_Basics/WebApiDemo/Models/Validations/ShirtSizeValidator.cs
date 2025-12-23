@@ -1,4 +1,4 @@
-namespace WebAppiDemo.Models.Validations
+namespace WebApiDemo.Models.Validations
 {
   public static class ShirtSizeValidator
   {

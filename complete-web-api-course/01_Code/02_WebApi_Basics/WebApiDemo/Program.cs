@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAppiDemo.Data;
-using WebAppiDemo.Models;
+using WebApiDemo.Data;
+using WebApiDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

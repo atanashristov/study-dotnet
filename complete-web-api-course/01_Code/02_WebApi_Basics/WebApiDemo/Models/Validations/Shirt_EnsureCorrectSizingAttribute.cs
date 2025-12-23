@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WebAppiDemo.Models.Validations
+namespace WebApiDemo.Models.Validations
 {
     // Interface for types that need size validation
     public interface IShirtSizing

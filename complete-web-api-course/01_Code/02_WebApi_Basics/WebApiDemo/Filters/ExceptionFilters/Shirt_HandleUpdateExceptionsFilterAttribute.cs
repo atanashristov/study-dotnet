@@ -1,10 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using WebAppiDemo.Models.Repositories;
-using WebAppiDemo.Utilities;
+using WebApiDemo.Data;
+using WebApiDemo.Models.Repositories;
+using WebApiDemo.Utilities;
 
 class Shirt_HandleUpdateExceptionsFilterAttribute : ExceptionFilterAttribute
 {
+  private readonly ApplicationDbContext db;
+
+  public Shirt_HandleUpdateExceptionsFilterAttribute(ApplicationDbContext db)
+  {
+    this.db = db;
+  }
+
   public override void OnException(ExceptionContext context)
   {
     base.OnException(context);
@@ -15,7 +23,8 @@ class Shirt_HandleUpdateExceptionsFilterAttribute : ExceptionFilterAttribute
     if (context.Exception != null)
     {
       // Check if the shirt no longer exists (maybe deleted concurrently)
-      if (!ShirtRepository.ShirtExists(shirtId))
+      // Note: .Find() cannot be used here because it may return a tracked entity
+      if (db.Shirts.FirstOrDefault(s => s.ShirtId == shirtId) == null)
       {
         ValidationProblemDetailsHelper.SetValidationErrorResult(
             context,

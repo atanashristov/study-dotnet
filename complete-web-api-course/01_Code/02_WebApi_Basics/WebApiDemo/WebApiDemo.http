@@ -22,7 +22,7 @@ Content-Type: application/json
 
 {
   "brand": "Nike",
-  "color": "Red",
+  "color": "Yellow",
   "size": 8,
   "gender": "Male",
   "price": 29.99
@@ -42,11 +42,13 @@ Content-Type: application/json
 
 {
   "brand": "Nike",
-  "color": "Red",
+  "color": "Yellow",
   "size": 8,
   "gender": "Male",
-  "price": 25.99
+  "price": 29.99
 }
+
+
 
 ### 6. Patch Shirt
 PATCH {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}

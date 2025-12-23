@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Diagnostics;
 
-namespace WebAppiDemo.Utilities
+namespace WebApiDemo.Utilities
 {
   public static class ValidationProblemDetailsHelper
   {

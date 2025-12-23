@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using WebAppiDemo.Models.Validations;
+using WebApiDemo.Models.Validations;
 
-namespace WebAppiDemo.Models
+namespace WebApiDemo.Models
 {
     // Entity class - represents domain model
     public class Shirt

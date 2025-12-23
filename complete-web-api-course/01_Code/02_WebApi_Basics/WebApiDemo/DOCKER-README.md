@@ -271,7 +271,7 @@ dotnet watch --launch-profile https   # → Uses "https" profile (localhost:7298
 
 ```bash
 # Clone/navigate to project directory
-cd /path/to/WebAppiDemo
+cd /path/to/WebApiDemo
 
 # Build and run
 docker-compose up --build
@@ -461,7 +461,7 @@ docker-compose logs -f webapi
 ## File Structure
 
 ```
-WebAppiDemo/
+WebApiDemo/
 ├── Dockerfile              # Web API container definition
 ├── docker-compose.yml      # Multi-container application definition
 ├── .dockerignore           # Files to exclude from Docker build
@@ -530,7 +530,7 @@ docker exec -it postgres-webapi psql -U postgres -d WebApiDemo -c "\dt"
 
 **Important**: If you need a fresh start, use:
 ```bash
-docker-compose down && docker volume rm webappidemo_postgres_data
+docker-compose down && docker volume rm WebApiDemo_postgres_data
 ```
 This recreates both init.sql tables and EF Core tables with fresh data.
 
@@ -567,13 +567,13 @@ This recreates both init.sql tables and EF Core tables with fresh data.
 
 ```bash
 # Stop containers and remove the database volume for a fresh start
-docker-compose down && docker volume rm webappidemo_postgres_data
+docker-compose down && docker volume rm WebApiDemo_postgres_data
 ```
 
 **What this command does:**
 
 - `docker-compose down` - Stops and removes all containers and networks
-- `docker volume rm webappidemo_postgres_data` - Deletes the PostgreSQL data volume
+- `docker volume rm WebApiDemo_postgres_data` - Deletes the PostgreSQL data volume
 
 **When to use this:**
 

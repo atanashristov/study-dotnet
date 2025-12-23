@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using WebAppiDemo.Models;
+using WebApiDemo.Models;
 
-namespace WebAppiDemo.Data
+namespace WebApiDemo.Data
 {
     public class ApplicationDbContext : DbContext
     {

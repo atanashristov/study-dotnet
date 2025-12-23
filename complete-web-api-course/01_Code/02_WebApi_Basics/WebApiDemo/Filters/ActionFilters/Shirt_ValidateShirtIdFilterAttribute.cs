@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using WebAppiDemo.Data;
-using WebAppiDemo.Utilities;
+using WebApiDemo.Data;
+using WebApiDemo.Utilities;
 
-namespace WebAppiDemo.Filters
+namespace WebApiDemo.Filters
 {
     public class Shirt_ValidateShirtIdFilterAttribute : ActionFilterAttribute
     {
@@ -39,7 +39,7 @@ namespace WebAppiDemo.Filters
             }
             else
             {
-                context.HttpContext.Items["Shirt"] = shirt;
+                context.HttpContext.Items["shirt"] = shirt;
             }
         }
     }
