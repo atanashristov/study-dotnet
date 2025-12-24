@@ -23,7 +23,7 @@ Content-Type: application/json
 {
   "brand": "Nike",
   "color": "Yellow",
-  "size": 8,
+  "size": 9,
   "gender": "Male",
   "price": 29.99
 }

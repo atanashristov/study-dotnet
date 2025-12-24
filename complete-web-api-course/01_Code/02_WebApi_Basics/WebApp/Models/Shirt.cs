@@ -62,6 +62,18 @@ namespace WebApp.Models
 
         public double? Price { get; set; }
 
+        public static UpdateShirtDto FromEntity(Shirt shirt)
+        {
+            return new UpdateShirtDto
+            {
+                Brand = shirt.Brand,
+                Color = shirt.Color,
+                Size = shirt.Size,
+                Gender = shirt.Gender,
+                Price = shirt.Price
+            };
+        }
+
         public void ApplyToEntity(Shirt shirt)
         {
             shirt.Brand = Brand;

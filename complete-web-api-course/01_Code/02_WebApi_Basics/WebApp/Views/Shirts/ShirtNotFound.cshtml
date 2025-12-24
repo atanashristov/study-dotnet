@@ -1,0 +1,87 @@
+@{
+  ViewData["Title"] = "Shirt Not Found";
+  var shirtId = ViewBag.ShirtId;
+  var errorMessage = ViewBag.ErrorMessage ?? "The requested shirt was not found.";
+}
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card border-warning">
+        <div class="card-header bg-warning text-dark">
+          <h3 class="card-title mb-0">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Shirt Not Found
+          </h3>
+        </div>
+        <div class="card-body text-center">
+          <div class="mb-4">
+            <i class="bi bi-shirt" style="font-size: 4rem; color: #6c757d;"></i>
+          </div>
+
+          <h4 class="text-muted mb-3">@errorMessage</h4>
+
+          @if (shirtId != null)
+          {
+            <p class="text-muted">
+              We couldn't find a shirt with ID <strong>@shirtId</strong> in our system.
+            </p>
+          }
+
+          <p class="text-muted mb-4">
+            This might have happened because:
+          </p>
+
+          <ul class="list-unstyled text-muted mb-4">
+            <li><i class="bi bi-dot"></i> The shirt was deleted</li>
+            <li><i class="bi bi-dot"></i> The ID was typed incorrectly</li>
+            <li><i class="bi bi-dot"></i> You don't have permission to view this shirt</li>
+            <li><i class="bi bi-dot"></i> There was a temporary server issue</li>
+          </ul>
+
+          <div class="d-grid gap-2 d-md-block">
+            <a asp-action="Index" class="btn btn-primary me-2">
+              <i class="bi bi-list-ul me-1"></i>
+              View All Shirts
+            </a>
+            <a asp-action="CreateShirt" class="btn btn-success">
+              <i class="bi bi-plus-circle me-1"></i>
+              Create New Shirt
+            </a>
+          </div>
+        </div>
+        <div class="card-footer text-muted text-center">
+          <small>
+            Need help? Please contact support if you believe this is an error.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .bi {
+    /* Fallback for when Bootstrap Icons aren't available */
+  }
+
+  .bi-exclamation-triangle-fill:before {
+    content: "⚠️";
+  }
+
+  .bi-shirt:before {
+    content: "👔";
+  }
+
+  .bi-dot:before {
+    content: "•";
+  }
+
+  .bi-list-ul:before {
+    content: "📝";
+  }
+
+  .bi-plus-circle:before {
+    content: "➕";
+  }
+</style>

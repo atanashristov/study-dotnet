@@ -6,6 +6,10 @@ namespace WebApp.Data
         Task<TResponse?> InvokePostAsync<TRequest, TResponse>(
             string relativeUrl,
             TRequest request);
+        Task<TResponse?> InvokePutAsync<TRequest, TResponse>(
+            string relativeUrl,
+            TRequest request);
+        Task InvokeDeleteAsync(string relativeUrl);
     }
 
     public class WebApiExecuter : IWebApiExecuter
@@ -30,8 +34,58 @@ namespace WebApp.Data
         {
             var httpClient = httpClientFactory.CreateClient(apiName);
             var response = await httpClient.PostAsJsonAsync(relativeUrl, request);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var exception = new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).");
+                exception.Data["StatusCode"] = response.StatusCode;
+                exception.Data["ResponseContent"] = errorContent;
+                throw exception;
+            }
+
             return await response.Content.ReadFromJsonAsync<TResponse>();
+        }
+
+        public async Task<TResponse?> InvokePutAsync<TRequest, TResponse>(
+            string relativeUrl,
+            TRequest request)
+        {
+            var httpClient = httpClientFactory.CreateClient(apiName);
+            var response = await httpClient.PutAsJsonAsync(relativeUrl, request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var exception = new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).");
+                exception.Data["StatusCode"] = response.StatusCode;
+                exception.Data["ResponseContent"] = errorContent;
+                throw exception;
+            }
+
+            // Handle 204 No Content responses
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent ||
+                response.Content.Headers.ContentLength == 0)
+            {
+                return default(TResponse);
+            }
+
+            return await response.Content.ReadFromJsonAsync<TResponse>();
+        }
+
+        public async Task InvokeDeleteAsync(string relativeUrl)
+        {
+            var httpClient = httpClientFactory.CreateClient(apiName);
+            var response = await httpClient.DeleteAsync(relativeUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var exception = new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).");
+                exception.Data["StatusCode"] = response.StatusCode;
+                exception.Data["ResponseContent"] = errorContent;
+                throw exception;
+            }
         }
     }
 }

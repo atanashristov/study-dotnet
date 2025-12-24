@@ -15,46 +15,110 @@
         </div>
       }
 
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Shirts Collection</h2>
-        <a asp-action="CreateShirt" class="btn btn-primary">Create New Shirt</a>
-      </div>
+      @if (TempData["ErrorMessage"] != null)
+      {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          @TempData["ErrorMessage"]
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      }
 
-      @if (Model != null && Model.Any())
+      @if (ViewBag.ApiError == true)
+      {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <h4 class="alert-heading">
+            <i class="bi bi-exclamation-triangle"></i> Server Connection Error
+          </h4>
+          <p class="mb-2">@ViewBag.ApiErrorMessage</p>
+          <hr>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+              <i class="bi bi-arrow-clockwise"></i> Retry
+            </button>
+          </div>
+        </div>
+      }
+      else
+      {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2>Shirts Collection</h2>
+          <a asp-action="CreateShirt" class="btn btn-primary">Create New Shirt</a>
+        </div>
+      }
+
+      @if (ViewBag.ApiError != true && Model?.Any() == true)
       {
         <div class="table-responsive">
           <table class="table table-striped table-hover">
             <thead class="table-dark">
               <tr>
-                <th>ID</th>
+                <th class="d-none d-md-table-cell">ID</th>
                 <th>Brand</th>
-                <th>Color</th>
-                <th>Size</th>
-                <th>Gender</th>
-                <th>Price</th>
+                <th class="d-none d-sm-table-cell">Color</th>
+                <th class="d-none d-lg-table-cell">Size</th>
+                <th class="d-none d-md-table-cell">Gender</th>
+                <th class="d-none d-sm-table-cell">Price</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              @foreach (var shirt in Model)
+              @foreach (var shirt in Model!)
               {
                 <tr>
-                  <td>@shirt.ShirtId</td>
-                  <td>@shirt.Brand</td>
-                  <td>@shirt.Color</td>
-                  <td>@(shirt.Size?.ToString() ?? "N/A")</td>
-                  <td>@shirt.Gender</td>
-                  <td>@(shirt.Price?.ToString("C") ?? "N/A")</td>
+                  <td class="d-none d-md-table-cell">@shirt.ShirtId</td>
+                  <td>
+                    <div>
+                      <strong>@shirt.Brand</strong>
+                      <div class="d-sm-none text-muted small">
+                        @shirt.Color
+                        @if (shirt.Size.HasValue)
+                        {
+                          <span> • Size: @shirt.Size</span>
+                        }
+                        @if (shirt.Price.HasValue)
+                        {
+                          <span> • @shirt.Price.Value.ToString("C")</span>
+                        }
+                      </div>
+                      <div class="d-md-none d-sm-block text-muted small">@shirt.Gender</div>
+                    </div>
+                  </td>
+                  <td class="d-none d-sm-table-cell">@shirt.Color</td>
+                  <td class="d-none d-lg-table-cell">@(shirt.Size?.ToString() ?? "N/A")</td>
+                  <td class="d-none d-md-table-cell">@shirt.Gender</td>
+                  <td class="d-none d-sm-table-cell">@(shirt.Price?.ToString("C") ?? "N/A")</td>
+                  <td>
+                    <div class="btn-group-vertical btn-group-sm d-sm-none" role="group">
+                      <a asp-action="UpdateShirt" asp-route-shirtId="@shirt.ShirtId"
+                        class="btn btn-outline-primary btn-sm mb-1">Edit</a>
+                      <form asp-action="DeleteShirt" method="post">
+                        <input type="hidden" name="shirtId" value="@shirt.ShirtId" />
+                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                          onclick="return confirm('Are you sure you want to delete this shirt?')">Delete</button>
+                      </form>
+                    </div>
+                    <div class="btn-group d-none d-sm-block" role="group">
+                      <a asp-action="UpdateShirt" asp-route-shirtId="@shirt.ShirtId"
+                        class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                      <form asp-action="DeleteShirt" method="post" style="display:inline;">
+                        <input type="hidden" name="shirtId" value="@shirt.ShirtId" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('Are you sure you want to delete this shirt?')">Delete</button>
+                      </form>
+                    </div>
+                  </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
       }
-      else
+      else if (ViewBag.ApiError != true)
       {
         <div class="alert alert-info" role="alert">
           <h4 class="alert-heading">No Shirts Available</h4>
           <p>There are currently no shirts in the collection.</p>
+          <a asp-action="CreateShirt" class="btn btn-primary">Create Your First Shirt</a>
         </div>
       }
     </div>
