@@ -1,3 +1,4 @@
+using System.Text.Json;
 using WebApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +11,18 @@ builder.Services.AddHttpClient("ShirtsApi", client =>
 
 builder.Services.AddTransient<IWebApiExecuter, WebApiExecuter>();
 
+// Configure JSON serialization to use camelCase (matching API)
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 var app = builder.Build();
 

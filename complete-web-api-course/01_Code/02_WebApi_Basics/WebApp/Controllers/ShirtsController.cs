@@ -79,79 +79,35 @@ namespace WebApp.Controllers
                         return RedirectToAction(nameof(Index));
                     }
                 }
-                catch (HttpRequestException ex)
+                catch (WebApiException ex)
                 {
-                    _logger.LogError(ex, "Error creating shirt via API");
+                    _logger.LogError(ex, "API error creating shirt - Status: {StatusCode}", ex.StatusCode);
 
-                    // Try to extract detailed error messages from the response
-                    bool errorAdded = false;
-
-                    try
+                    // Add specific error messages from the API response
+                    if (ex.ErrorResponse?.Errors != null)
                     {
-                        // Check if the exception data contains response content
-                        if (ex.Data.Contains("ResponseContent"))
+                        foreach (var error in ex.ErrorResponse.Errors)
                         {
-                            var responseContent = ex.Data["ResponseContent"]?.ToString();
-                            if (!string.IsNullOrWhiteSpace(responseContent))
+                            foreach (var message in error.Value)
                             {
-                                var problemDetails = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
-
-                                if (problemDetails?.ContainsKey("errors") == true)
-                                {
-                                    var errorsJson = problemDetails["errors"].ToString();
-                                    if (!string.IsNullOrWhiteSpace(errorsJson))
-                                    {
-                                        var errors = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorsJson)
-                                            ?? Enumerable.Empty<KeyValuePair<string, string[]>>();
-
-                                        foreach (var error in errors)
-                                        {
-                                            foreach (var message in error.Value)
-                                            {
-                                                ModelState.AddModelError("", message);
-                                                errorAdded = true;
-                                            }
-                                        }
-                                    }
-                                }
+                                ModelState.AddModelError("", message);
                             }
                         }
                     }
-                    catch (Exception parseEx)
+                    else
                     {
-                        _logger.LogWarning(parseEx, "Could not parse error response from API");
-                    }
-
-                    // If we couldn't extract specific errors, use generic messages based on status code
-                    if (!errorAdded)
-                    {
-                        // Try to get the actual HTTP status code from the exception
-                        var statusCode = GetHttpStatusCodeFromException(ex);
-
-                        switch (statusCode)
+                        // Fallback to generic message based on status code
+                        var errorMessage = ex.StatusCode switch
                         {
-                            case System.Net.HttpStatusCode.BadRequest:
-                                ModelState.AddModelError("", "Invalid data provided. Please check your input and try again.");
-                                break;
-                            case System.Net.HttpStatusCode.Conflict:
-                                ModelState.AddModelError("", "A shirt with these properties already exists.");
-                                break;
-                            case System.Net.HttpStatusCode.InternalServerError:
-                                ModelState.AddModelError("", "Server error occurred. Please try again later.");
-                                break;
-                            case System.Net.HttpStatusCode.Unauthorized:
-                                ModelState.AddModelError("", "You are not authorized to perform this action.");
-                                break;
-                            case System.Net.HttpStatusCode.Forbidden:
-                                ModelState.AddModelError("", "Access to this resource is forbidden.");
-                                break;
-                            case System.Net.HttpStatusCode.UnprocessableEntity:
-                                ModelState.AddModelError("", "The request was well-formed but contains semantic errors.");
-                                break;
-                            default:
-                                ModelState.AddModelError("", "An error occurred while creating the shirt. Please try again.");
-                                break;
-                        }
+                            System.Net.HttpStatusCode.BadRequest => "Invalid data provided. Please check your input and try again.",
+                            System.Net.HttpStatusCode.Conflict => "A shirt with these properties already exists.",
+                            System.Net.HttpStatusCode.InternalServerError => "Server error occurred. Please try again later.",
+                            System.Net.HttpStatusCode.Unauthorized => "You are not authorized to perform this action.",
+                            System.Net.HttpStatusCode.Forbidden => "Access to this resource is forbidden.",
+                            System.Net.HttpStatusCode.UnprocessableEntity => "The request was well-formed but contains semantic errors.",
+                            _ => "An error occurred while creating the shirt. Please try again."
+                        };
+                        ModelState.AddModelError("", errorMessage);
                     }
                 }
                 catch (Exception ex)
@@ -181,13 +137,11 @@ namespace WebApp.Controllers
                 ViewBag.ErrorMessage = "The requested shirt was not found.";
                 return View("ShirtNotFound");
             }
-            catch (HttpRequestException ex)
+            catch (WebApiException ex)
             {
-                _logger.LogWarning(ex, "Error retrieving shirt with ID {ShirtId} from API", shirtId);
+                _logger.LogWarning(ex, "API error retrieving shirt with ID {ShirtId} - Status: {StatusCode}", shirtId, ex.StatusCode);
 
-                var statusCode = GetHttpStatusCodeFromException(ex);
-
-                if (statusCode == System.Net.HttpStatusCode.NotFound)
+                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     ViewBag.ShirtId = shirtId;
                     ViewBag.ErrorMessage = $"Shirt with ID {shirtId} does not exist.";
@@ -196,7 +150,7 @@ namespace WebApp.Controllers
 
                 // For other HTTP errors, show a generic error
                 ViewBag.ShirtId = shirtId;
-                ViewBag.ErrorMessage = statusCode switch
+                ViewBag.ErrorMessage = ex.StatusCode switch
                 {
                     System.Net.HttpStatusCode.Unauthorized => "You are not authorized to access this shirt.",
                     System.Net.HttpStatusCode.Forbidden => "Access to this shirt is forbidden.",
@@ -226,82 +180,36 @@ namespace WebApp.Controllers
                     ViewBag.SuccessMessage = "Shirt updated successfully!";
                     return View(updateShirtDto);
                 }
-                catch (HttpRequestException ex)
+                catch (WebApiException ex)
                 {
-                    _logger.LogError(ex, "Error updating shirt with ID {ShirtId} via API", shirtId);
+                    _logger.LogError(ex, "API error updating shirt with ID {ShirtId} - Status: {StatusCode}", shirtId, ex.StatusCode);
 
-                    // Try to extract detailed error messages from the response
-                    bool errorAdded = false;
-
-                    try
+                    // Add specific error messages from the API response
+                    if (ex.ErrorResponse?.Errors != null)
                     {
-                        // Check if the exception data contains response content
-                        if (ex.Data.Contains("ResponseContent"))
+                        foreach (var error in ex.ErrorResponse.Errors)
                         {
-                            var responseContent = ex.Data["ResponseContent"]?.ToString();
-                            if (!string.IsNullOrWhiteSpace(responseContent))
+                            foreach (var message in error.Value)
                             {
-                                var problemDetails = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
-
-                                if (problemDetails?.ContainsKey("errors") == true)
-                                {
-                                    var errorsJson = problemDetails["errors"].ToString();
-                                    if (!string.IsNullOrWhiteSpace(errorsJson))
-                                    {
-                                        var errors = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorsJson)
-                                            ?? Enumerable.Empty<KeyValuePair<string, string[]>>();
-
-                                        foreach (var error in errors)
-                                        {
-                                            foreach (var message in error.Value)
-                                            {
-                                                ModelState.AddModelError("", message);
-                                                errorAdded = true;
-                                            }
-                                        }
-                                    }
-                                }
+                                ModelState.AddModelError("", message);
                             }
                         }
                     }
-                    catch (Exception parseEx)
+                    else
                     {
-                        _logger.LogWarning(parseEx, "Could not parse error response from API");
-                    }
-
-                    // If we couldn't extract specific errors, use generic messages based on status code
-                    if (!errorAdded)
-                    {
-                        // Try to get the actual HTTP status code from the exception
-                        var statusCode = GetHttpStatusCodeFromException(ex);
-
-                        switch (statusCode)
+                        // Fallback to generic message based on status code
+                        var errorMessage = ex.StatusCode switch
                         {
-                            case System.Net.HttpStatusCode.BadRequest:
-                                ModelState.AddModelError("", "Invalid data provided. Please check your input and try again.");
-                                break;
-                            case System.Net.HttpStatusCode.NotFound:
-                                ModelState.AddModelError("", $"Shirt with ID {shirtId} was not found.");
-                                break;
-                            case System.Net.HttpStatusCode.Conflict:
-                                ModelState.AddModelError("", "A shirt with these properties already exists.");
-                                break;
-                            case System.Net.HttpStatusCode.InternalServerError:
-                                ModelState.AddModelError("", "Server error occurred. Please try again later.");
-                                break;
-                            case System.Net.HttpStatusCode.Unauthorized:
-                                ModelState.AddModelError("", "You are not authorized to perform this action.");
-                                break;
-                            case System.Net.HttpStatusCode.Forbidden:
-                                ModelState.AddModelError("", "Access to this resource is forbidden.");
-                                break;
-                            case System.Net.HttpStatusCode.UnprocessableEntity:
-                                ModelState.AddModelError("", "The request was well-formed but contains semantic errors.");
-                                break;
-                            default:
-                                ModelState.AddModelError("", "An error occurred while updating the shirt. Please try again.");
-                                break;
-                        }
+                            System.Net.HttpStatusCode.BadRequest => "Invalid data provided. Please check your input and try again.",
+                            System.Net.HttpStatusCode.NotFound => $"Shirt with ID {shirtId} was not found.",
+                            System.Net.HttpStatusCode.Conflict => "A shirt with these properties already exists.",
+                            System.Net.HttpStatusCode.InternalServerError => "Server error occurred. Please try again later.",
+                            System.Net.HttpStatusCode.Unauthorized => "You are not authorized to perform this action.",
+                            System.Net.HttpStatusCode.Forbidden => "Access to this resource is forbidden.",
+                            System.Net.HttpStatusCode.UnprocessableEntity => "The request was well-formed but contains semantic errors.",
+                            _ => "An error occurred while updating the shirt. Please try again."
+                        };
+                        ModelState.AddModelError("", errorMessage);
                     }
                 }
                 catch (Exception ex)
@@ -332,19 +240,17 @@ namespace WebApp.Controllers
                 TempData["SuccessMessage"] = "Shirt deleted successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            catch (HttpRequestException ex)
+            catch (WebApiException ex)
             {
-                _logger.LogError(ex, "Error deleting shirt with ID {ShirtId} via API", shirtId);
+                _logger.LogError(ex, "API error deleting shirt with ID {ShirtId} - Status: {StatusCode}", shirtId, ex.StatusCode);
 
-                var statusCode = GetHttpStatusCodeFromException(ex);
-
-                var errorMessage = statusCode switch
+                var errorMessage = ex.StatusCode switch
                 {
                     System.Net.HttpStatusCode.NotFound => $"Shirt with ID {shirtId} was not found.",
                     System.Net.HttpStatusCode.Unauthorized => "You are not authorized to delete this shirt.",
                     System.Net.HttpStatusCode.Forbidden => "Access to delete this shirt is forbidden.",
                     System.Net.HttpStatusCode.InternalServerError => "Server error occurred while deleting the shirt. Please try again later.",
-                    _ => "An error occurred while deleting the shirt. Please try again."
+                    _ => ex.GetDisplayMessage()
                 };
 
                 TempData["ErrorMessage"] = errorMessage;
@@ -370,50 +276,6 @@ namespace WebApp.Controllers
             }
         }
 
-
-        private static System.Net.HttpStatusCode? GetHttpStatusCodeFromException(HttpRequestException ex)
-        {
-            // For .NET 5+ versions, HttpRequestException has a Data property that might contain status code
-            if (ex.Data.Contains("StatusCode"))
-            {
-                if (ex.Data["StatusCode"] is System.Net.HttpStatusCode statusCode)
-                {
-                    return statusCode;
-                }
-                if (int.TryParse(ex.Data["StatusCode"]?.ToString(), out var statusCodeInt))
-                {
-                    return (System.Net.HttpStatusCode)statusCodeInt;
-                }
-            }
-
-            // Alternative: Try to extract from HttpRequestError (if available)
-            if (ex.Data.Contains("HttpRequestError"))
-            {
-                // This would be for newer .NET versions with HttpRequestError
-                return ex.Data["HttpRequestError"] switch
-                {
-                    _ when ex.Data["HttpRequestError"]?.ToString()?.Contains("BadRequest") == true => System.Net.HttpStatusCode.BadRequest,
-                    _ when ex.Data["HttpRequestError"]?.ToString()?.Contains("Unauthorized") == true => System.Net.HttpStatusCode.Unauthorized,
-                    _ when ex.Data["HttpRequestError"]?.ToString()?.Contains("Forbidden") == true => System.Net.HttpStatusCode.Forbidden,
-                    _ when ex.Data["HttpRequestError"]?.ToString()?.Contains("NotFound") == true => System.Net.HttpStatusCode.NotFound,
-                    _ when ex.Data["HttpRequestError"]?.ToString()?.Contains("Conflict") == true => System.Net.HttpStatusCode.Conflict,
-                    _ when ex.Data["HttpRequestError"]?.ToString()?.Contains("InternalServerError") == true => System.Net.HttpStatusCode.InternalServerError,
-                    _ => null
-                };
-            }
-
-            // Fallback: Parse from exception message (less reliable but sometimes necessary)
-            var message = ex.Message;
-            if (message.Contains("400")) return System.Net.HttpStatusCode.BadRequest;
-            if (message.Contains("401")) return System.Net.HttpStatusCode.Unauthorized;
-            if (message.Contains("403")) return System.Net.HttpStatusCode.Forbidden;
-            if (message.Contains("404")) return System.Net.HttpStatusCode.NotFound;
-            if (message.Contains("409")) return System.Net.HttpStatusCode.Conflict;
-            if (message.Contains("422")) return System.Net.HttpStatusCode.UnprocessableEntity;
-            if (message.Contains("500")) return System.Net.HttpStatusCode.InternalServerError;
-
-            return null; // Unknown status code
-        }
 
         // [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         // public IActionResult Error()

@@ -69,8 +69,9 @@ namespace WebApiDemo.Utilities
       {
         StatusCodes.Status400BadRequest => "https://tools.ietf.org/html/rfc9110#section-15.5.1",
         StatusCodes.Status404NotFound => "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        StatusCodes.Status409Conflict => "https://tools.ietf.org/html/rfc9110#section-15.5.10",
         StatusCodes.Status422UnprocessableEntity => "https://tools.ietf.org/html/rfc9110#section-15.5.21",
-        _ => "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+        _ => "https://tools.ietf.org/html/rfc7807#section-3.1"
       };
     }
   }

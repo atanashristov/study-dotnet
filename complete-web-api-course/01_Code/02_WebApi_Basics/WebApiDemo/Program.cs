@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiDemo.Data;
@@ -21,35 +23,56 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-      options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
+
+// Configure Problem Details for consistent error responses
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = (context) =>
+    {
+        // Always include type for error categorization
+        context.ProblemDetails.Type ??= "https://tools.ietf.org/html/rfc7807#section-3.1";
+
+        // Always include instance (request path) for specific occurrence identification
+        context.ProblemDetails.Instance ??= context.HttpContext.Request.Path;
+
+        // Always include traceId for log correlation and debugging
+        context.ProblemDetails.Extensions["traceId"] = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
+    };
+});
 
 // Configure ApiBehaviorOptions to use camelCase for validation errors
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-  options.InvalidModelStateResponseFactory = context =>
-  {
-    var problemDetails = new ValidationProblemDetails(context.ModelState);
-
-    // Convert error keys to camelCase
-    var camelCaseErrors = new Dictionary<string, string[]>();
-    foreach (var error in problemDetails.Errors)
+    options.InvalidModelStateResponseFactory = context =>
     {
-      // Handle empty keys or convert to camelCase
-      var camelCaseKey = string.IsNullOrEmpty(error.Key)
-        ? error.Key
-        : char.ToLowerInvariant(error.Key[0]) + error.Key.Substring(1);
-      camelCaseErrors[camelCaseKey] = error.Value;
-    }
+        var problemDetails = new ValidationProblemDetails(context.ModelState);
 
-    problemDetails.Errors.Clear();
-    foreach (var error in camelCaseErrors)
-    {
-      problemDetails.Errors[error.Key] = error.Value;
-    }
+        // Add consistent Problem Details fields
+        problemDetails.Type ??= "https://tools.ietf.org/html/rfc7807#section-3.1";
+        problemDetails.Instance = context.HttpContext.Request.Path;
+        problemDetails.Extensions["traceId"] = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
 
-    return new BadRequestObjectResult(problemDetails);
-  };
+        // Convert error keys to camelCase
+        var camelCaseErrors = new Dictionary<string, string[]>();
+        foreach (var error in problemDetails.Errors)
+        {
+            // Handle empty keys or convert to camelCase
+            var camelCaseKey = string.IsNullOrEmpty(error.Key)
+            ? error.Key
+            : char.ToLowerInvariant(error.Key[0]) + error.Key.Substring(1);
+            camelCaseErrors[camelCaseKey] = error.Value;
+        }
+
+        problemDetails.Errors.Clear();
+        foreach (var error in camelCaseErrors)
+        {
+            problemDetails.Errors[error.Key] = error.Value;
+        }
+
+        return new BadRequestObjectResult(problemDetails);
+    };
 });
 
 var app = builder.Build();

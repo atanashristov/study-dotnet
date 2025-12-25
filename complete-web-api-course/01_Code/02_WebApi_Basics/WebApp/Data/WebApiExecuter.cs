@@ -25,7 +25,15 @@ namespace WebApp.Data
         public async Task<TResponse?> InvokeGetAsync<TResponse>(string relativeUrl)
         {
             var httpClient = httpClientFactory.CreateClient(apiName);
-            return await httpClient.GetFromJsonAsync<TResponse>(relativeUrl);
+            // var response = await httpClient.GetAsync(relativeUrl);
+
+            // Another way to do it:
+            var request = new HttpRequestMessage(HttpMethod.Get, relativeUrl);
+            var response = await httpClient.SendAsync(request);
+
+            await EnsureSuccessStatusCodeAsync(response);
+
+            return await response.Content.ReadFromJsonAsync<TResponse>();
         }
 
         public async Task<TResponse?> InvokePostAsync<TRequest, TResponse>(
@@ -35,14 +43,7 @@ namespace WebApp.Data
             var httpClient = httpClientFactory.CreateClient(apiName);
             var response = await httpClient.PostAsJsonAsync(relativeUrl, request);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var exception = new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).");
-                exception.Data["StatusCode"] = response.StatusCode;
-                exception.Data["ResponseContent"] = errorContent;
-                throw exception;
-            }
+            await EnsureSuccessStatusCodeAsync(response);
 
             return await response.Content.ReadFromJsonAsync<TResponse>();
         }
@@ -54,14 +55,7 @@ namespace WebApp.Data
             var httpClient = httpClientFactory.CreateClient(apiName);
             var response = await httpClient.PutAsJsonAsync(relativeUrl, request);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var exception = new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).");
-                exception.Data["StatusCode"] = response.StatusCode;
-                exception.Data["ResponseContent"] = errorContent;
-                throw exception;
-            }
+            await EnsureSuccessStatusCodeAsync(response);
 
             // Handle 204 No Content responses
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent ||
@@ -78,13 +72,15 @@ namespace WebApp.Data
             var httpClient = httpClientFactory.CreateClient(apiName);
             var response = await httpClient.DeleteAsync(relativeUrl);
 
+            await EnsureSuccessStatusCodeAsync(response);
+        }
+
+        private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response)
+        {
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                var exception = new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).");
-                exception.Data["StatusCode"] = response.StatusCode;
-                exception.Data["ResponseContent"] = errorContent;
-                throw exception;
+                throw new WebApiException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).", errorContent, response.StatusCode, response.ReasonPhrase);
             }
         }
     }
