@@ -1,21 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Data;
 using WebApp.Models;
-using WebApp.Models.Repositories;
 
 namespace WebApp.Controllers
 {
     [Route("[controller]")]
-    public class ShirtsController : Controller
+    public class ShirtsController : BaseController
     {
-        private readonly ILogger<ShirtsController> _logger;
         private readonly IWebApiExecuter _webApiExecuter;
 
         public ShirtsController(
             ILogger<ShirtsController> logger,
             IWebApiExecuter webApiExecuter)
+            : base(logger)
         {
-            _logger = logger;
             _webApiExecuter = webApiExecuter;
         }
 
@@ -28,32 +26,9 @@ namespace WebApp.Controllers
                 var shirts = await _webApiExecuter.InvokeGetAsync<List<Shirt>>("shirts");
                 return View(shirts);
             }
-            catch (System.Net.Sockets.SocketException ex)
-            {
-                _logger.LogError(ex, "Network connection error while fetching shirts from API");
-                ViewBag.ApiError = true;
-                ViewBag.ApiErrorMessage = "Could not connect to the server. Please check your connection and try again.";
-                return View(new List<Shirt>());
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "HTTP error while fetching shirts from API");
-                ViewBag.ApiError = true;
-                ViewBag.ApiErrorMessage = "Unable to retrieve shirts from the server. Please try again later.";
-                return View(new List<Shirt>());
-            }
-            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
-            {
-                _logger.LogError(ex, "Timeout error while fetching shirts from API");
-                ViewBag.ApiError = true;
-                ViewBag.ApiErrorMessage = "The request timed out. Please try again.";
-                return View(new List<Shirt>());
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error while fetching shirts from API");
-                ViewBag.ApiError = true;
-                ViewBag.ApiErrorMessage = "An unexpected error occurred. Please try again later.";
+                HandleNetworkException(ex, "fetching shirts from API");
                 return View(new List<Shirt>());
             }
         }
@@ -75,7 +50,7 @@ namespace WebApp.Controllers
 
                     if (response != null)
                     {
-                        TempData["SuccessMessage"] = "Shirt created successfully!";
+                        SetSuccessTempData("Shirt created successfully!");
                         return RedirectToAction(nameof(Index));
                     }
                 }
@@ -83,32 +58,12 @@ namespace WebApp.Controllers
                 {
                     _logger.LogError(ex, "API error creating shirt - Status: {StatusCode}", ex.StatusCode);
 
-                    // Add specific error messages from the API response
-                    if (ex.ErrorResponse?.Errors != null)
+                    var contextualMessages = new Dictionary<System.Net.HttpStatusCode, string>
                     {
-                        foreach (var error in ex.ErrorResponse.Errors)
-                        {
-                            foreach (var message in error.Value)
-                            {
-                                ModelState.AddModelError("", message);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Fallback to generic message based on status code
-                        var errorMessage = ex.StatusCode switch
-                        {
-                            System.Net.HttpStatusCode.BadRequest => "Invalid data provided. Please check your input and try again.",
-                            System.Net.HttpStatusCode.Conflict => "A shirt with these properties already exists.",
-                            System.Net.HttpStatusCode.InternalServerError => "Server error occurred. Please try again later.",
-                            System.Net.HttpStatusCode.Unauthorized => "You are not authorized to perform this action.",
-                            System.Net.HttpStatusCode.Forbidden => "Access to this resource is forbidden.",
-                            System.Net.HttpStatusCode.UnprocessableEntity => "The request was well-formed but contains semantic errors.",
-                            _ => "An error occurred while creating the shirt. Please try again."
-                        };
-                        ModelState.AddModelError("", errorMessage);
-                    }
+                        { System.Net.HttpStatusCode.Conflict, "A shirt with these properties already exists." }
+                    };
+
+                    HandleWebApiException(ex, "An error occurred while creating the shirt. Please try again.", contextualMessages);
                 }
                 catch (Exception ex)
                 {
@@ -150,13 +105,13 @@ namespace WebApp.Controllers
 
                 // For other HTTP errors, show a generic error
                 ViewBag.ShirtId = shirtId;
-                ViewBag.ErrorMessage = ex.StatusCode switch
+                var contextualMessages = new Dictionary<System.Net.HttpStatusCode, string>
                 {
-                    System.Net.HttpStatusCode.Unauthorized => "You are not authorized to access this shirt.",
-                    System.Net.HttpStatusCode.Forbidden => "Access to this shirt is forbidden.",
-                    System.Net.HttpStatusCode.InternalServerError => "A server error occurred while retrieving the shirt. Please try again later.",
-                    _ => "An error occurred while retrieving the shirt. Please try again."
+                    { System.Net.HttpStatusCode.Unauthorized, "You are not authorized to access this shirt." },
+                    { System.Net.HttpStatusCode.Forbidden, "Access to this shirt is forbidden." },
+                    { System.Net.HttpStatusCode.InternalServerError, "A server error occurred while retrieving the shirt. Please try again later." }
                 };
+                ViewBag.ErrorMessage = GetWebApiErrorMessage(ex, "An error occurred while retrieving the shirt. Please try again.", contextualMessages);
                 return View("ShirtNotFound");
             }
             catch (Exception ex)
@@ -184,33 +139,13 @@ namespace WebApp.Controllers
                 {
                     _logger.LogError(ex, "API error updating shirt with ID {ShirtId} - Status: {StatusCode}", shirtId, ex.StatusCode);
 
-                    // Add specific error messages from the API response
-                    if (ex.ErrorResponse?.Errors != null)
+                    var contextualMessages = new Dictionary<System.Net.HttpStatusCode, string>
                     {
-                        foreach (var error in ex.ErrorResponse.Errors)
-                        {
-                            foreach (var message in error.Value)
-                            {
-                                ModelState.AddModelError("", message);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Fallback to generic message based on status code
-                        var errorMessage = ex.StatusCode switch
-                        {
-                            System.Net.HttpStatusCode.BadRequest => "Invalid data provided. Please check your input and try again.",
-                            System.Net.HttpStatusCode.NotFound => $"Shirt with ID {shirtId} was not found.",
-                            System.Net.HttpStatusCode.Conflict => "A shirt with these properties already exists.",
-                            System.Net.HttpStatusCode.InternalServerError => "Server error occurred. Please try again later.",
-                            System.Net.HttpStatusCode.Unauthorized => "You are not authorized to perform this action.",
-                            System.Net.HttpStatusCode.Forbidden => "Access to this resource is forbidden.",
-                            System.Net.HttpStatusCode.UnprocessableEntity => "The request was well-formed but contains semantic errors.",
-                            _ => "An error occurred while updating the shirt. Please try again."
-                        };
-                        ModelState.AddModelError("", errorMessage);
-                    }
+                        { System.Net.HttpStatusCode.NotFound, $"Shirt with ID {shirtId} was not found." },
+                        { System.Net.HttpStatusCode.Conflict, "A shirt with these properties already exists." }
+                    };
+
+                    HandleWebApiException(ex, "An error occurred while updating the shirt. Please try again.", contextualMessages);
                 }
                 catch (Exception ex)
                 {
@@ -237,41 +172,29 @@ namespace WebApp.Controllers
             try
             {
                 await _webApiExecuter.InvokeDeleteAsync($"shirts/{shirtId}");
-                TempData["SuccessMessage"] = "Shirt deleted successfully!";
+                SetSuccessTempData("Shirt deleted successfully!");
                 return RedirectToAction(nameof(Index));
             }
             catch (WebApiException ex)
             {
                 _logger.LogError(ex, "API error deleting shirt with ID {ShirtId} - Status: {StatusCode}", shirtId, ex.StatusCode);
 
-                var errorMessage = ex.StatusCode switch
+                var contextualMessages = new Dictionary<System.Net.HttpStatusCode, string>
                 {
-                    System.Net.HttpStatusCode.NotFound => $"Shirt with ID {shirtId} was not found.",
-                    System.Net.HttpStatusCode.Unauthorized => "You are not authorized to delete this shirt.",
-                    System.Net.HttpStatusCode.Forbidden => "Access to delete this shirt is forbidden.",
-                    System.Net.HttpStatusCode.InternalServerError => "Server error occurred while deleting the shirt. Please try again later.",
-                    _ => ex.GetDisplayMessage()
+                    { System.Net.HttpStatusCode.NotFound, $"Shirt with ID {shirtId} was not found." },
+                    { System.Net.HttpStatusCode.Unauthorized, "You are not authorized to delete this shirt." },
+                    { System.Net.HttpStatusCode.Forbidden, "Access to delete this shirt is forbidden." },
+                    { System.Net.HttpStatusCode.InternalServerError, "Server error occurred while deleting the shirt. Please try again later." }
                 };
 
-                TempData["ErrorMessage"] = errorMessage;
-                return RedirectToAction(nameof(Index));
-            }
-            catch (System.Net.Sockets.SocketException ex)
-            {
-                _logger.LogError(ex, "Network connection error while deleting shirt with ID {ShirtId}", shirtId);
-                TempData["ErrorMessage"] = "Could not connect to the server. Please check your connection and try again.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
-            {
-                _logger.LogError(ex, "Timeout error while deleting shirt with ID {ShirtId}", shirtId);
-                TempData["ErrorMessage"] = "The request timed out. Please try again.";
+                var errorMessage = GetWebApiErrorMessage(ex, "An error occurred while deleting the shirt. Please try again.", contextualMessages);
+                SetErrorTempData(errorMessage);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error deleting shirt with ID {ShirtId}", shirtId);
-                TempData["ErrorMessage"] = "An unexpected error occurred while deleting the shirt. Please try again.";
+                HandleNetworkException(ex, $"deleting shirt with ID {shirtId}");
+                SetErrorTempData(ViewBag.ApiErrorMessage ?? "An unexpected error occurred while deleting the shirt. Please try again.");
                 return RedirectToAction(nameof(Index));
             }
         }
