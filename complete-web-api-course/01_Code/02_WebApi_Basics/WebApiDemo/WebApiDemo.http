@@ -1,6 +1,17 @@
 @WebApiDemo_BaseUrl = http://localhost:5250
 # @WebApiDemo_BaseUrl = http://localhost:8000
 
+### Authenticate
+POST {{WebApiDemo_BaseUrl}}/auth
+Content-Type: application/json
+
+{
+  "ClientId": "ef9073b5-06d6-438e-a8c3-e6e76170dfca",
+  "ClientSecret": "x8h3pS6hYkUu9n5Z"
+}
+
+
+
 ### 1. Get Hello World
 GET {{WebApiDemo_BaseUrl}}/
 Accept: application/json

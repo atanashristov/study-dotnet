@@ -30,9 +30,16 @@ namespace WebApp.Data
 
     /// <summary>
     /// A URI reference that identifies the specific occurrence of the problem.
-    /// Examples: "/api/shirts/AA11", "/api/shirts/18"
+    /// Examples: "/api/shirts/AA11", "/api/shirts/18", "/auth"
     /// </summary>
     public string? Instance { get; set; }
+
+    /// <summary>
+    /// A human-readable explanation specific to this occurrence of the problem.
+    /// Used for authentication errors and other non-validation scenarios.
+    /// Example: "Invalid client credentials."
+    /// </summary>
+    public string? Detail { get; set; }
 
     /// <summary>
     /// Validation errors grouped by field name.
@@ -82,11 +89,18 @@ namespace WebApp.Data
     }
 
     /// <summary>
-    /// Gets a user-friendly error message combining title and first error.
+    /// Gets a user-friendly error message combining title, detail, and first error.
     /// </summary>
     /// <returns>A user-friendly error message</returns>
     public string GetDisplayMessage()
     {
+      // For authentication and other non-validation errors, use detail if available
+      if (!string.IsNullOrWhiteSpace(Detail))
+      {
+        return !string.IsNullOrWhiteSpace(Title) ? $"{Title}: {Detail}" : Detail;
+      }
+
+      // For validation errors, use title with first validation error
       if (!string.IsNullOrWhiteSpace(Title))
       {
         var firstError = GetAllErrorMessages().FirstOrDefault();
@@ -111,5 +125,25 @@ namespace WebApp.Data
     /// Determines if this is a conflict error (409 Conflict).
     /// </summary>
     public bool IsConflictError => Status == 409;
+
+    /// <summary>
+    /// Determines if this is an unauthorized error (401 Unauthorized).
+    /// </summary>
+    public bool IsUnauthorizedError => Status == 401;
+
+    /// <summary>
+    /// Determines if this is a forbidden error (403 Forbidden).
+    /// </summary>
+    public bool IsForbiddenError => Status == 403;
+
+    /// <summary>
+    /// Determines if this is a server error (5xx status codes).
+    /// </summary>
+    public bool IsServerError => Status >= 500 && Status < 600;
+
+    /// <summary>
+    /// Determines if this error has validation details (errors collection).
+    /// </summary>
+    public bool HasValidationErrors => Errors != null && Errors.Count > 0;
   }
 }

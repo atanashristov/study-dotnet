@@ -2,6 +2,33 @@
 
 ## Examples of errors API responses
 
+### POST {{WebApiDemo_BaseUrl}}/auth
+
+```json
+{
+  "ClientId": "YourClientId",
+  "ClientSecret": "YourClientSecret"
+}
+```
+
+```json
+HTTP/1.1 401 Unauthorized
+Connection: close
+Content-Type: application/problem+json; charset=utf-8
+Date: Sat, 27 Dec 2025 14:20:20 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.2",
+  "title": "Authentication Failed",
+  "status": 401,
+  "detail": "Invalid client credentials.",
+  "instance": "/auth",
+  "traceId": "00-0629a6c7ed6158d356072d5e6cbff62b-2cc0e73f865e0a29-00"
+}
+```
+
 ### GET {{WebApiDemo_BaseUrl}}/api/shirts/{{firstItemId}}
 
 ```json
