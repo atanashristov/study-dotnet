@@ -1,7 +1,8 @@
 @WebApiDemo_BaseUrl = http://localhost:5250
 # @WebApiDemo_BaseUrl = http://localhost:8000
 
-### Authenticate
+### 1. Authenticate
+# @name getAuthToken
 POST {{WebApiDemo_BaseUrl}}/auth
 Content-Type: application/json
 
@@ -10,26 +11,31 @@ Content-Type: application/json
   "ClientSecret": "x8h3pS6hYkUu9n5Z"
 }
 
+###
+@accessToken = {{getAuthToken.response.body.access_token}}
 
 
-### 1. Get Hello World
+### 2. Get Hello World
 GET {{WebApiDemo_BaseUrl}}/
 Accept: application/json
 
-### 2. Get Shirts
+### 3. Get Shirts
 # @name getShirts
 GET {{WebApiDemo_BaseUrl}}/api/shirts
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
-### 3. Get Shirt by Id
+### 4. Get Shirt by Id
 @firstItemId = {{getShirts.response.body.$.[0].shirtId}}
 GET {{WebApiDemo_BaseUrl}}/api/shirts/{{firstItemId}}
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
-### 4. Create New Shirt
+### 5. Create New Shirt
 # @name createShirt
 POST {{WebApiDemo_BaseUrl}}/api/shirts
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "brand": "Nike",
@@ -39,17 +45,18 @@ Content-Type: application/json
   "price": 29.99
 }
 
-# ### 4.1. Create New Shirt
+# ### 5.1. Create New Shirt
 # # @name createShirtFromForm
 # POST {{WebApiDemo_BaseUrl}}/api/shirts
 # Content-Type: application/x-www-form-urlencoded
 
 # size=43&color=Blue&price=19.99
 
-### 5. Update Shirt
+### 6. Update Shirt
 @newItemId = {{createShirt.response.body.shirtId}}
 PUT {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "brand": "Nike",
@@ -60,10 +67,10 @@ Content-Type: application/json
 }
 
 
-
-### 6. Patch Shirt
+### 7. Patch Shirt
 PATCH {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "color": "Red",
@@ -71,5 +78,6 @@ Content-Type: application/json
   "price": 99.99
 }
 
-### 7. Delete Shirt
+### 8. Delete Shirt
 DELETE {{WebApiDemo_BaseUrl}}/api/shirts/{{newItemId}}
+Authorization: Bearer {{accessToken}}

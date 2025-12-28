@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApiDemo.Data;
 using WebApiDemo.Filters;
+using WebApiDemo.Filters.AuthFilters;
 using WebApiDemo.Models;
 
 namespace WebApiDemo.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [JwtTokenAuthFilter]
     public class ShirtsController : ControllerBase
     {
         private readonly ApplicationDbContext db;

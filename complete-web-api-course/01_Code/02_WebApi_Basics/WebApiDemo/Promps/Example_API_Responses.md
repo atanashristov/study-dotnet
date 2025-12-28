@@ -29,6 +29,25 @@ Transfer-Encoding: chunked
 }
 ```
 
+### GET {{WebApiDemo_BaseUrl}}/api/shirts
+
+```json
+HTTP/1.1 401 Unauthorized
+Connection: close
+Content-Type: application/problem+json; charset=utf-8
+Date: Sun, 28 Dec 2025 17:52:54 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.2",
+  "title": "Unauthorized",
+  "status": 401,
+  "instance": "/api/shirts",
+  "traceId": "00-625d8d0fc3328d269daeb8f801fabd58-346f6a3e8dd3fca1-00"
+}
+```
+
 ### GET {{WebApiDemo_BaseUrl}}/api/shirts/{{firstItemId}}
 
 ```json
