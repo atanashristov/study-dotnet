@@ -21,7 +21,7 @@ namespace WebApiDemo.Controllers
         {
             if (Authenticator.Authenticate(credentials.ClientId, credentials.ClientSecret))
             {
-                var expiresAt = DateTime.UtcNow.AddMinutes(10);
+                var expiresAt = DateTime.UtcNow.AddMinutes(30);
                 return Ok(new
                 {
                     access_token = Authenticator.CreateToken(
