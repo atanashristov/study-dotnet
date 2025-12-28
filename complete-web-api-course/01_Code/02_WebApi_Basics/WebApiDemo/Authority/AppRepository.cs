@@ -15,12 +15,6 @@ namespace WebApiDemo.Authority
             }
         };
 
-        public static bool Authenticate(string clientId, string clientSecret)
-        {
-            return _applications.Any(app =>
-                app.ClientId == clientId &&
-                app.ClientSecret == clientSecret);
-        }
         public static Application? GetApplicationByClientId(string clientId)
         {
             return _applications.FirstOrDefault(app => app.ClientId == clientId);
