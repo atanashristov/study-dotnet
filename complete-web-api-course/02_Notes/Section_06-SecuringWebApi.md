@@ -26,3 +26,28 @@ Then we add middleware:
 app.UseAuthentication();
 app.UseAuthorization());
 ```
+
+## Lesson 06.53: Save and reuse JWT Token
+
+We are saving in a session cookie. We change _Program.cs_:
+
+```cs
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(1);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+...
+
+app.UseSession();
+```
+
+Also, we have to inject `HttpContext` in the `WebExecuter` class. So we change _Program.cs_:
+
+```cs
+builder.Services.AddHttpContextAccessor();
+```
+
+and inject in the classes where we need.

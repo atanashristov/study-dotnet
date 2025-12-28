@@ -18,13 +18,16 @@ namespace WebApp.Data
         private const string authorityApiName = "AuthorityApi";
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
         public WebApiExecuter(
-                IHttpClientFactory httpClientFactory,
-                IConfiguration configuration)
+                    IHttpClientFactory httpClientFactory,
+                    IConfiguration configuration,
+                    IHttpContextAccessor httpContextAccessor)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<TResponse?> InvokeGetAsync<TResponse>(string relativeUrl)
@@ -101,10 +104,24 @@ namespace WebApp.Data
 
         private async Task AddJwtToHeaders(HttpClient httpClient)
         {
+            JwtToken? existingToken = null;
+            var tokenString = this.httpContextAccessor.HttpContext?.Session.GetString("access_token");
+            if (!string.IsNullOrWhiteSpace(tokenString))
+            {
+                existingToken = System.Text.Json.JsonSerializer.Deserialize<JwtToken>(tokenString);
+            }
+            if (existingToken != null && existingToken.ExpiresAt > DateTime.UtcNow.AddMinutes(5))
+            {
+                // Token is still valid, use it
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", existingToken.AccessToken);
+                return;
+            }
+
             var clientId = configuration.GetValue<string>("ClientId");
             var clientSecret = configuration.GetValue<string>("ClientSecret");
 
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+            if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
             {
                 throw new InvalidOperationException("ClientId and ClientSecret must be configured.");
             }
@@ -123,6 +140,8 @@ namespace WebApp.Data
             // Get JWT from authority
             string strToken = await response.Content.ReadAsStringAsync();
             var jwtToken = System.Text.Json.JsonSerializer.Deserialize<JwtToken>(strToken);
+
+            this.httpContextAccessor.HttpContext?.Session.SetString("access_token", strToken);
 
             // Add JWT to Authorization header
             httpClient.DefaultRequestHeaders.Authorization =
