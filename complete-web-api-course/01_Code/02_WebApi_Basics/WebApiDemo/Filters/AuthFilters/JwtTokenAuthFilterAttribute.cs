@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Filters;
+using WebApiDemo.Attributes;
 using WebApiDemo.Authority;
 using WebApiDemo.Utilities;
 
@@ -40,12 +41,33 @@ namespace WebApiDemo.Filters.AuthFilters
             var configuration = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
             var secretKey = configuration["SecurityKey"] ?? string.Empty;
 
-            // 4. Validate the token
-            if (!await Authenticator.ValidateTokenAsync(tokenString, secretKey))
+            // 4. Validate the token and exact claims
+            // if (!await Authenticator.ValidateTokenAsync(tokenString, secretKey))
+            // {
+            //     context.Result = new Microsoft.AspNetCore.Mvc.UnauthorizedResult();
+            //     return;
+            // }
+            var claims = await Authenticator.ValidateTokenAsync(tokenString, secretKey);
+            if (claims == null)
             {
                 context.Result = new Microsoft.AspNetCore.Mvc.UnauthorizedResult();
                 return;
             }
+
+            // Get the claims required
+            var requiredClaims = context.ActionDescriptor.EndpointMetadata
+                .OfType<RequiredClaimAttribute>()
+                .ToList();
+
+            if (!requiredClaims.All(rc => claims.Any(c =>
+                c.Type.Equals(rc.ClaimType, StringComparison.OrdinalIgnoreCase)
+                    && c.Value.Equals(rc.ClaimValue, StringComparison.OrdinalIgnoreCase))))
+            {
+                // Not all required claims are present
+                context.Result = new Microsoft.AspNetCore.Mvc.StatusCodeResult(403);
+                return;
+            }
+
         }
     }
 }

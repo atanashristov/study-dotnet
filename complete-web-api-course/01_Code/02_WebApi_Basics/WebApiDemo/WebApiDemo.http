@@ -38,7 +38,7 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "brand": "Nike",
+  "brand": "My Brand",
   "color": "Yellow",
   "size": 10,
   "gender": "Male",
@@ -59,9 +59,9 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "brand": "Nike",
+  "brand": "My Brand",
   "color": "Yellow",
-  "size": 2,
+  "size": 8,
   "gender": "Male",
   "price": 29.99
 }

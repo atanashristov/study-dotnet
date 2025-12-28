@@ -133,6 +133,7 @@ namespace WebApp.Controllers
                     await _webApiExecuter.InvokePutAsync<UpdateShirtDto, Shirt>($"shirts/{shirtId}", updateShirtDto);
 
                     ViewBag.SuccessMessage = "Shirt updated successfully!";
+                    ViewBag.ShirtId = shirtId; // Preserve the shirt ID for the view
                     return View(updateShirtDto);
                 }
                 catch (WebApiException ex)
@@ -188,13 +189,48 @@ namespace WebApp.Controllers
                 };
 
                 var errorMessage = GetWebApiErrorMessage(ex, "An error occurred while deleting the shirt. Please try again.", contextualMessages);
+
+                // Stay on the Edit screen and show the error
+                try
+                {
+                    var shirtToUpdate = await _webApiExecuter.InvokeGetAsync<Shirt>($"shirts/{shirtId}");
+                    if (shirtToUpdate != null)
+                    {
+                        ViewBag.ErrorMessage = errorMessage;
+                        return View("UpdateShirt", UpdateShirtDto.FromEntity(shirtToUpdate));
+                    }
+                }
+                catch (Exception refreshEx)
+                {
+                    _logger.LogError(refreshEx, "Error refreshing shirt data after delete failure for ID {ShirtId}", shirtId);
+                }
+
+                // If we can't refresh the shirt data, show error and redirect to Index
                 SetErrorTempData(errorMessage);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 HandleNetworkException(ex, $"deleting shirt with ID {shirtId}");
-                SetErrorTempData(ViewBag.ApiErrorMessage ?? "An unexpected error occurred while deleting the shirt. Please try again.");
+                var errorMessage = ViewBag.ApiErrorMessage ?? "An unexpected error occurred while deleting the shirt. Please try again.";
+
+                // Try to stay on Edit screen for network errors too
+                try
+                {
+                    var shirtToUpdate = await _webApiExecuter.InvokeGetAsync<Shirt>($"shirts/{shirtId}");
+                    if (shirtToUpdate != null)
+                    {
+                        ViewBag.ErrorMessage = errorMessage;
+                        return View("UpdateShirt", UpdateShirtDto.FromEntity(shirtToUpdate));
+                    }
+                }
+                catch (Exception refreshEx)
+                {
+                    _logger.LogError(refreshEx, "Error refreshing shirt data after network error for ID {ShirtId}", shirtId);
+                }
+
+                // If we can't refresh the shirt data, show error and redirect to Index
+                SetErrorTempData(errorMessage);
                 return RedirectToAction(nameof(Index));
             }
         }

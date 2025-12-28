@@ -11,7 +11,7 @@ namespace WebApiDemo.Authority
                 ClientId = "ef9073b5-06d6-438e-a8c3-e6e76170dfca",
                 ClientSecret = "x8h3pS6hYkUu9n5Z",
                 // Scopes = "read:shirts write:shirts",
-                Scopes = "read,write",
+                Scopes = "read,write,delete",
             }
         };
 
