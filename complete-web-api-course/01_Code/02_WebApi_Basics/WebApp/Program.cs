@@ -9,6 +9,12 @@ builder.Services.AddHttpClient("ShirtsApi", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
+builder.Services.AddHttpClient("AuthorityApi", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5250/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
 builder.Services.AddTransient<IWebApiExecuter, WebApiExecuter>();
 
 // Configure JSON serialization to use camelCase (matching API)

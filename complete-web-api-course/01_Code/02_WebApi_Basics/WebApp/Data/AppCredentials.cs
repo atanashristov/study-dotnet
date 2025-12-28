@@ -1,4 +1,4 @@
-namespace WebApiDemo.Authority
+namespace WebApp.Data
 {
     public class AppCredentials
     {
