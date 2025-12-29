@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using System.Text.Json;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using WebApiDemo.Data;
 using WebApiDemo.Models;
 
@@ -75,7 +76,39 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+// Add OpenAPI support with Bearer authentication
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info = new()
+        {
+            Title = "WebApiDemo API",
+            Version = "v1",
+            Description = "A sample Web API with JWT authentication support"
+        };
+
+        return Task.CompletedTask;
+    });
+});
+
+// Add JWT Authentication (if not already configured elsewhere)
+// builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+// builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
+// OpenAPI documentation with Scalar UI in development environment
+// OpenAPI documentation with Scalar UI in development environment
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "WebApiDemo API";
+        options.Theme = ScalarTheme.BluePlanet;
+    });
+}
 
 // Auto-create database in development environment only
 if (app.Environment.IsDevelopment())
