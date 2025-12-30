@@ -1,5 +1,8 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
@@ -76,21 +79,28 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
-// Add OpenAPI support with Bearer authentication
-builder.Services.AddOpenApi(options =>
+// Add API Versioning
+builder.Services.AddApiVersioning(options =>
 {
-    options.AddDocumentTransformer((document, context, cancellationToken) =>
-    {
-        document.Info = new()
-        {
-            Title = "WebApiDemo API",
-            Version = "v1",
-            Description = "A sample Web API with JWT authentication support"
-        };
+    // Default version
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
 
-        return Task.CompletedTask;
-    });
+    // Version reading strategies
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new HeaderApiVersionReader("x-api-version"),
+        new QueryStringApiVersionReader("api-version"),
+        new UrlSegmentApiVersionReader()
+    );
+}).AddMvc().AddApiExplorer(options =>
+{
+    // Group name format for OpenAPI
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
+
+// Add OpenAPI support
+builder.Services.AddOpenApi();
 
 // Add JWT Authentication (if not already configured elsewhere)
 // builder.Services.AddAuthentication("Bearer").AddJwtBearer();
@@ -99,14 +109,17 @@ builder.Services.AddOpenApi(options =>
 var app = builder.Build();
 
 // OpenAPI documentation with Scalar UI in development environment
-// OpenAPI documentation with Scalar UI in development environment
 if (app.Environment.IsDevelopment())
 {
+    // Map a single OpenAPI document
     app.MapOpenApi();
+
+    // Configure Scalar UI
     app.MapScalarApiReference(options =>
     {
         options.Title = "WebApiDemo API";
         options.Theme = ScalarTheme.BluePlanet;
+        options.ShowSidebar = true;
     });
 }
 

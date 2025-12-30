@@ -12,6 +12,10 @@ namespace WebApiDemo.Models
         public int? Size { get; set; }
         public required string Gender { get; set; }
         public double? Price { get; set; }
+
+        // V2 API properties
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? LastModified { get; set; }
     }
 
     // For POST

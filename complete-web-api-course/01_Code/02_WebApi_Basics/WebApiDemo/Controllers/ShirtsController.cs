@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
 using WebApiDemo.Attributes;
 using WebApiDemo.Data;
 using WebApiDemo.Filters;
@@ -9,6 +10,7 @@ namespace WebApiDemo.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [JwtTokenAuthFilter]
     public class ShirtsController : ControllerBase
     {
