@@ -1,8 +1,6 @@
-# Complete Guide to Web API in .NET 10: Master API Development
+# RESTful Web API in .NET Core - The Beginners Guide (.NET 10)
 
-Contains code and notes from studying [Complete Guide to Web API in .NET 10: Master API Development](https://www.udemy.com/course/complete-web-api-course/)
-
-Reference to author's code: [source code](https://github.com/frank-liu-toronto/WebAPI-NET10)
+Contains code and notes from studying [RESTful Web API in .NET Core - The Beginners Guide (.NET 10)](https://www.udemy.com/course/restful-api-with-asp-dot-net-core-web-api/).
 
 ## Folders
 
