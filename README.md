@@ -9,3 +9,19 @@ Contains code and notes from studying [Advanced .NET Web API Security: Permissio
 - [Web API in .NET 10](./complete-web-api-course/)
 
 Contains code and notes from studying [Complete Guide to Web API in .NET 10: Master API Development](https://www.udemy.com/course/complete-web-api-course/)
+
+- [TODO: RESTful Web API in .NET Core - The Beginners Guide (.NET 10)](./web-api-beginners/)
+
+Contains code and notes from studying [RESTful Web API in .NET Core - The Beginners Guide (.NET 10)](https://www.udemy.com/course/restful-api-with-asp-dot-net-core-web-api/).
+
+- [TODO: RESTful Web API in .NET Core - The Advanced Guide (.NET 10)](./web-api-advanced/)
+
+Contains code and notes from studying [RESTful Web API in .NET Core - The Advanced Guide (.NET 10)](https://www.udemy.com/course/restful-web-api-the-complete-guide-net7-api-part-2).
+
+- [TODO: Master ASP.NET Core Identity: Authentication & Authorization](./aspnet-core-identity/)
+
+Contains code and notes from studying [Master ASP.NET Core Identity: Authentication & Authorization](https://www.udemy.com/course/complete-guide-to-aspnet-core-identity).
+
+- [TODO: ASP.NET Core 9 Web API Cookbook:](./webapi-9-cookbook/)
+
+Contains code and notes from studying [ASP.NET Core 9 Web API Cookbook](https://www.packtpub.com/en-at/product/aspnet-core-9-web-api-cookbook-9781835880357).
