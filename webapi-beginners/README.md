@@ -2,6 +2,8 @@
 
 Contains code and notes from studying [RESTful Web API in .NET Core - The Beginners Guide (.NET 10)](https://www.udemy.com/course/restful-api-with-asp-dot-net-core-web-api/).
 
+GitHub Repository [here](https://www.dotnetmastery.com/Home/Details?courseId=7)
+
 ## Folders
 
 - [Code](./01_Code/)
