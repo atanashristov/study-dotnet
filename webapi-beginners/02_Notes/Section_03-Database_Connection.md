@@ -131,3 +131,67 @@ We add _connection string_ "DefaultConnection" to the _appsettings.json_.
 ## Lesson 03.21: Db Context
 
 Add file _Data/ApplicationDbContext.cs_.
+
+```cs
+using Microsoft.EntityFrameworkCore;
+
+namespace RoyalVillaApi.Data
+{
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    {
+        // Define your DbSets here
+        // public DbSet<YourEntity> YourEntities { get; set; }
+    }
+}
+```
+
+Add the Db Context to `builder.Services` in _Program.cs_:
+
+```cs
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+```
+
+Then we create an empty "Initial" DB migration:
+
+```sh
+dotnet ef migrations add Initial
+```
+
+And run it:
+
+```sh
+dotnet ef database update
+```
+
+Since this is an empty migration, running it will create the migrations history table "__EFMigrationsHistory" and add one record to it:
+
+```sql
+royalvilla=# \d
+                 List of relations
+ Schema |         Name          | Type  |  Owner
+--------+-----------------------+-------+----------
+ public | __EFMigrationsHistory | table | postgres
+(1 row)
+
+royalvilla=# \d+ "__EFMigrationsHistory"
+                                              Table "public.__EFMigrationsHistory"
+     Column     |          Type          | Collation | Nullable | Default | Storage  | Compression | Stats target | Description
+----------------+------------------------+-----------+----------+---------+----------+-------------+--------------+-------------
+ MigrationId    | character varying(150) |           | not null |         | extended |             |              |
+ ProductVersion | character varying(32)  |           | not null |         | extended |             |              |
+Indexes:
+    "PK___EFMigrationsHistory" PRIMARY KEY, btree ("MigrationId")
+Not-null constraints:
+    "__EFMigrationsHistory_MigrationId_not_null" NOT NULL "MigrationId"
+    "__EFMigrationsHistory_ProductVersion_not_null" NOT NULL "ProductVersion"
+Access method: heap
+
+royalvilla=# select * from "__EFMigrationsHistory";
+      MigrationId       | ProductVersion
+------------------------+----------------
+ 20260102192101_Initial | 10.0.1
+(1 row)
+
+```
