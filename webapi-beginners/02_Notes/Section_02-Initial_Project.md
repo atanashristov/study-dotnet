@@ -55,3 +55,12 @@ if (app.Environment.IsDevelopment())
 ```
 
 Now we can run the project and browse to <http://localhost:5240/scalar/v1>.
+
+## Lesson 02.13: Make Scalar UI default url
+
+Edit _launchSettings.json_ file and add make sure the profiles have:
+
+```json
+      "launchBrowser": true,
+      "launchUrl": "scalar",
+```
