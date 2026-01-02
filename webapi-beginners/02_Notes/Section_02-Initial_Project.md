@@ -76,3 +76,7 @@ Added `VillaController`.
 It inherits from `ControllerBase`.
 
 We decorate the controller with `ApiController` attribute.
+
+## Lesson 02.16: First endpoint
+
+Add controller method attribute it with _verb_, and a _route_.
