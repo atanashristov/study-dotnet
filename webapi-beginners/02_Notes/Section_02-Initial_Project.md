@@ -80,3 +80,9 @@ We decorate the controller with `ApiController` attribute.
 ## Lesson 02.16: First endpoint
 
 Add controller method attribute it with _verb_, and a _route_.
+
+## Lesson 02.17: Route Name
+
+Set route name on the controller and use conventional routes for the endpoint based on action method name.
+
+For the route on controller, prefer explicit path `[Route("api/villa")]` instead of controller name based `[Route("api/[controller]")]`
