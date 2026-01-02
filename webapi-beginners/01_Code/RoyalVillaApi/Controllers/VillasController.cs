@@ -10,10 +10,12 @@ namespace RoyalVillaApi.Controllers
     public class VillasController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly ILogger<VillasController> _logger;
 
-        public VillasController(ApplicationDbContext db)
+        public VillasController(ApplicationDbContext db, ILogger<VillasController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -23,9 +25,29 @@ namespace RoyalVillaApi.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public string GetVillaById(int id)
+        public async Task<ActionResult<Villa>> GetVillaById(int id)
         {
-            return "Villa Details of Id: " + id;
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest("Invalid villa ID.");
+                }
+
+                var villa = await _db.Villas.FirstOrDefaultAsync(v => v.Id == id);
+                if (villa == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(villa);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving villa with ID {VillaId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
+            }
         }
 
         // [HttpGet("{id:int}/{name}")]
