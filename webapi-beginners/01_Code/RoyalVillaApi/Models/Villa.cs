@@ -22,7 +22,7 @@ namespace RoyalVillaApi.Models
         // Nullable column
         public string? ImageUrl { get; set; }
         public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
 
     }
 }

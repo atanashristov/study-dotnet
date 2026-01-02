@@ -239,3 +239,87 @@ And apply it to the database:
 ```sh
 dotnet ef database update
 ```
+
+## Lesson 03.23: Seed Villas Table
+
+There is a new way in Dot.Net 10 for seeding data.
+
+In this course the author adds the records into the `ApplicationDbContext`:
+
+```cs
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    {
+        public DbSet<Villa> Villas { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+
+            modelBuilder.Entity<Villa>().HasData(
+                new Villa
+                {
+                    Id = 1,
+                    Name = "Royal Villa",
+                    Details = "Luxurious villa with stunning ocean views and private beach access.",
+                    Rate = 500.0,
+                    Sqft = 2500,
+                    Occupancy = 6,
+                    ImageUrl = "https://dotnetmasteryimages.blob.core.windows.net/bluevillaimages/villa1.jpg",
+                    CreatedDate = new DateTime(2024, 1, 1),
+                    UpdatedDate = new DateTime(2024, 1, 1)
+                },
+...
+            );
+        }
+
+```
+
+**Lesson Summary:**
+
+In Lesson 03.23, we implemented database seeding using the modern .NET 10 approach:
+
+1. **Created DatabaseSeeder Class**: Built a dedicated `Data/DatabaseSeeder.cs` class that encapsulates all database initialization and seeding logic, keeping Program.cs clean and maintainable.
+
+2. **Added Development-Only Seeding**: Configured the seeder to run only in Development mode through Program.cs, ensuring production databases are never auto-populated.
+
+3. **Implemented Retry Logic**: Added robust retry mechanism (up to 10 attempts with 2-second delays) to handle Docker container startup timing issues.
+
+4. **Seeded Sample Data**: Populated the Villas table with 5 sample records (Royal Villa, Diamond Villa, Pool Villa, Luxury Villa, and Garden Villa) for development and testing.
+
+5. **Smart Seeding**: The seeder checks if data exists before seeding, preventing duplicate entries on subsequent runs.
+
+6. **Fixed PostgreSQL DateTime Issues**: Used `DateTime.SpecifyKind(..., DateTimeKind.Utc)` for all DateTime values, as PostgreSQL requires UTC timestamps.
+
+7. **Added Entity Tracking Cleanup**: Implemented `_context.ChangeTracker.Clear()` in the retry logic to prevent entity tracking conflicts.
+
+Key benefits of this approach over traditional migration-based seeding (`HasData()`):
+
+- Only runs in Development environment
+- No need to create new migrations when changing seed data
+- Easier to maintain and modify
+- Clearer separation of concerns
+- Better for dynamic seed data scenarios
+
+**Important Docker Note:**
+
+After making changes to the seeding code, you **must rebuild the Docker image** for changes to take effect:
+
+```bash
+cd 01_Code
+docker-compose down
+docker-compose build --no-cache webapi  # Rebuild with latest code
+docker-compose up -d
+```
+
+To verify seeding worked:
+
+```bash
+# View logs
+docker-compose logs -f webapi
+
+# Query database
+docker exec royalvilla_postgres psql -U postgres -d royalvilla -c 'SELECT "Id", "Name", "Rate" FROM "Villas";'
+```
+
+The database is now fully set up with test data for development work!

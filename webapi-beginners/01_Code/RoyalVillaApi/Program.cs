@@ -15,6 +15,21 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// Auto-create database and seed data in development environment only
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<DatabaseSeeder>>();
+    var seeder = new DatabaseSeeder(context, logger);
+    await seeder.InitializeAsync();
+}
+else
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("🔒 Environment: {EnvironmentName} - Skipping automatic database setup.", app.Environment.EnvironmentName);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
