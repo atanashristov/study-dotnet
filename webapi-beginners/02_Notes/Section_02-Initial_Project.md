@@ -86,3 +86,16 @@ Add controller method attribute it with _verb_, and a _route_.
 Set route name on the controller and use conventional routes for the endpoint based on action method name.
 
 For the route on controller, prefer explicit path `[Route("api/villa")]` instead of controller name based `[Route("api/[controller]")]`
+
+## Lesson 02.18: Route Parameters Binding
+
+Provide e GET villa details method:
+
+```cs
+        [HttpGet("{id:int}")]
+        public string GetVillaById(int id)
+        {
+            return "Villa Details of Id: " + id;
+        }
+
+```
