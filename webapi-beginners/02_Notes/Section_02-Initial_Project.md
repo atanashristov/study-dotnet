@@ -64,3 +64,15 @@ Edit _launchSettings.json_ file and add make sure the profiles have:
       "launchBrowser": true,
       "launchUrl": "scalar",
 ```
+
+## Lesson 02.14: Code cleanup
+
+Removed `WeatherForecastController`.
+
+## Lesson 02.15: Add first API controller
+
+Added `VillaController`.
+
+It inherits from `ControllerBase`.
+
+We decorate the controller with `ApiController` attribute.
