@@ -99,3 +99,35 @@ Provide e GET villa details method:
         }
 
 ```
+
+## Lesson 02.19: Parameters of API
+
+Provide action method with multiple path based parameters:
+
+```cs
+        [HttpGet("{id:int}/{name}")]
+        public string GetVillaByIdAndName(int id, string name)
+        {
+            return "Villa Details of Id: " + id + " and Name: " + name;
+        }
+```
+
+Note: "string" is the default type for name binding. If we specify the type, it will throw compiler error.
+
+The _default route binding_ is based on route path (`FromRoute` attribute):
+
+```cs
+        [HttpGet("{id:int}/{name}")]
+        public string GetVillaByIdAndName([FromRoute] int id, [FromRoute] string name)
+        {
+            return "Villa Details of Id: " + id + " and Name: " + name;
+        }
+```
+
+We can bind parameters using the following attributes
+
+- `FromRoute`: bind from route path segments
+- `FromQuery`: bind from query string params
+- `FromHeader`: bind from header params
+
+Note: The path will have to stay unique.

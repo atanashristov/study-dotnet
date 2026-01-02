@@ -18,5 +18,11 @@ namespace RoyalVillaApi.Controllers
             return "Villa Details of Id: " + id;
         }
 
+        [HttpGet("{id:int}/{name}")]
+        public string GetVillaByIdAndName([FromRoute] int id, [FromRoute] string name)
+        {
+            return "Villa Details of Id: " + id + " and Name: " + name;
+        }
+
     }
 }
