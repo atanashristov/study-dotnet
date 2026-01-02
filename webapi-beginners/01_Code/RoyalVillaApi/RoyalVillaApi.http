@@ -1,6 +1,13 @@
 @RoyalVillaApi_HostAddress = http://localhost:5240
 
-GET {{RoyalVillaApi_HostAddress}}/weatherforecast/
+### Get All Villas
+# @name getAllVillas
+GET {{RoyalVillaApi_HostAddress}}/api/villas
 Accept: application/json
 
 ###
+
+@villaId = {{getAllVillas.response.body.$[0].id}}
+
+GET {{RoyalVillaApi_HostAddress}}/api/villas/{{villaId}}
+Accept: application/json

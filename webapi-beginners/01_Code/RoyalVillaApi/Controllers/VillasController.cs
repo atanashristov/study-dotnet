@@ -6,8 +6,7 @@ using RoyalVillaApi.Models;
 namespace RoyalVillaApi.Controllers
 {
     [Route("api/villas")]
-    [ApiController]
-    public class VillasController : ControllerBase
+    public class VillasController : BaseApiController
     {
         private readonly ApplicationDbContext _db;
         private readonly ILogger<VillasController> _logger;
@@ -31,22 +30,22 @@ namespace RoyalVillaApi.Controllers
             {
                 if (id <= 0)
                 {
-                    return BadRequest("Invalid villa ID.");
+                    return ProblemBadRequest("Invalid villa ID. The ID must be greater than 0.");
                 }
 
                 var villa = await _db.Villas.FirstOrDefaultAsync(v => v.Id == id);
                 if (villa == null)
                 {
-                    return NotFound();
+                    return ProblemNotFound($"Villa with ID {id} was not found.");
                 }
 
+                // throw new Exception("Simulated exception for demonstration purposes.");
                 return Ok(villa);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving villa with ID {VillaId}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An error occurred while processing your request.");
+                return ProblemInternalServerError();
             }
         }
 

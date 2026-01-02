@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RoyalVillaApi.Configuration;
 using RoyalVillaApi.Data;
 using Scalar.AspNetCore;
 
@@ -8,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+// Add Problem Details support for unified error responses
+builder.Services.AddProblemDetailsSupport();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -31,6 +35,11 @@ else
 }
 
 // Configure the HTTP request pipeline.
+
+// Add exception handler and status code pages for Problem Details
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
