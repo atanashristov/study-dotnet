@@ -25,3 +25,7 @@ Contains code and notes from studying [Master ASP.NET Core Identity: Authenticat
 - [TODO: ASP.NET Core 9 Web API Cookbook:](./webapi-cookbook/)
 
 Contains code and notes from studying [ASP.NET Core 9 Web API Cookbook](https://www.packtpub.com/en-at/product/aspnet-core-9-web-api-cookbook-9781835880357).
+
+- [TODO: End-to-End ASP.NET Core - PostgreSQL Data Stores & Azure Services](./aspnet-end2end)
+
+Contains code and notes from studying [End-to-End ASP.NET Core - PostgreSQL Data Stores & Azure Services: Build Scalable Web Apps with ASP.NET Core, PostgreSQL, and Azure Services](https://www.packtpub.com/en-at/product/end-to-end-aspnet-core-postgresql-data-stores-azure-services-9781806383672).

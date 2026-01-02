@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RoyalVillaApi.Controllers
 {
-    [Route("api/villa")]
+    [Route("api/villas")]
     [ApiController]
-    public class VillaController : ControllerBase
+    public class VillasController : ControllerBase
     {
         [HttpGet]
         public string GetVillas()
@@ -18,11 +18,11 @@ namespace RoyalVillaApi.Controllers
             return "Villa Details of Id: " + id;
         }
 
-        [HttpGet("{id:int}/{name}")]
-        public string GetVillaByIdAndName([FromRoute] int id, [FromRoute] string name)
-        {
-            return "Villa Details of Id: " + id + " and Name: " + name;
-        }
+        // [HttpGet("{id:int}/{name}")]
+        // public string GetVillaByIdAndName([FromRoute] int id, [FromRoute] string name)
+        // {
+        //     return "Villa Details of Id: " + id + " and Name: " + name;
+        // }
 
     }
 }

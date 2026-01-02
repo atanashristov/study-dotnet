@@ -195,3 +195,47 @@ royalvilla=# select * from "__EFMigrationsHistory";
 (1 row)
 
 ```
+
+## Lesson 03.22: Create Villas Table
+
+We add table model class `Villa` as file _Models/Villa.cs_.
+
+Use data annotations as needed to control column definitions.
+
+Then we change the `ApplicationDbContext` and define  `DbSet` and what is the model:
+
+```cs
+using Microsoft.EntityFrameworkCore;
+using RoyalVillaApi.Models;
+
+namespace RoyalVillaApi.Data
+{
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    {
+        public DbSet<Villa> Villas { get; set; } // Add villa table
+    }
+}
+```
+
+Use the following **conventions**:
+
+| Layer            | Component        | Convention    | Example          |
+| ---------------- | ---------------- | ------------- | ---------------- |
+| Api Route        | Route name       | Plural        | api/Villas       |
+| C# (Controller)  | Controller Class | Plural        | VillasController |
+| C# (Object)      | Model Class      | Singular      | Villa            |
+| C# (Data Access) | DbSet Property   | Plural        | Villas           |
+| Database         | Table Name       | Plural        | Villas           |
+| Database         | Primary Key      | Singular + Id | Id or VillaId    |
+
+Then create migration "AddVillasToDb":
+
+```sh
+dotnet ef migrations add AddVillasToDb
+```
+
+And apply it to the database:
+
+```sh
+dotnet ef database update
+```
