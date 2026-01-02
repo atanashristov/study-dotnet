@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RoyalVillaApi.Data;
+using RoyalVillaApi.Models;
 
 namespace RoyalVillaApi.Controllers
 {
@@ -6,10 +9,17 @@ namespace RoyalVillaApi.Controllers
     [ApiController]
     public class VillasController : ControllerBase
     {
-        [HttpGet]
-        public string GetVillas()
+        private readonly ApplicationDbContext _db;
+
+        public VillasController(ApplicationDbContext db)
         {
-            return "List of Villas";
+            _db = db;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Villa>>> GetVillas()
+        {
+            return Ok(await _db.Villas.ToListAsync());
         }
 
         [HttpGet("{id:int}")]
