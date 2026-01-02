@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: royalvilla_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: royalvilla
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - royalvilla-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  webapi:
+    build:
+      context: ./RoyalVillaApi
+      dockerfile: Dockerfile
+    container_name: royalvilla_webapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=royalvilla;Username=postgres;Password=postgres123
+    ports:
+      - "5050:8080"
+      - "5051:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - royalvilla-network
+
+networks:
+  royalvilla-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
